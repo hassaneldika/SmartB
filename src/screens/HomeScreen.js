@@ -1,17 +1,17 @@
-/* eslint-disable react-native/no-inline-styles */
 /* eslint-disable no-alert */
+/* eslint-disable react-native/no-inline-styles */
 /* eslint-disable consistent-this */
 /* eslint-disable eqeqeq */
 /* eslint-disable no-unused-vars */
 /* eslint-disable prettier/prettier */
 /* eslint-disable no-trailing-spaces */
 import * as React from 'react';
-import {Button,Platform,StyleSheet,ImageBackground,BackHandler,Image,Text,TextInput,View,TouchableOpacity,Alert} from 'react-native';
+import {Button,Platform,StyleSheet,ImageBackground,BackHandler,Image,Text,TextInput,View,TouchableOpacity,PermissionsAndroid,Alert,Dimensions} from 'react-native';
 import Config from 'react-native-config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SmoothPinCodeInput from 'react-native-smooth-pincode-input';
 import Logo from '../assets/Logo.svg';
-
+import Geolocation from '@react-native-community/geolocation';
 
 export default class HomeScreen extends React.Component {
   constructor(props) {
@@ -54,22 +54,17 @@ export default class HomeScreen extends React.Component {
     let self = this;
     var cleanedPh = ('' + this.state.ph_text).replace(/\D/g, '');
     if (this.state.enablePh) {
-      fetch(Config.API_URL + '/register', {
+      const requestOptions = {
         method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          phoneNumber: cleanedPh,
-        }),
-      })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phoneNumber: cleanedPh }),
+      };
+      fetch('https://mobile-punch.connectedbarrelapi.com/register/', requestOptions)
         .then(response => response.json())
         .then(responseJson => {
           //        AsyncStorage.setItem('userdata', JSON.stringify(responseJson) );
           //        this.props.navigation.navigate('Detail') ;
-          console.log(responseJson);
-          if (responseJson.error == undefined) {
+          if (responseJson?.MessageId || responseJson) {
             this.setState((state, props) => ({
               buttonIsClicked: false,
               showCode: true,
@@ -79,12 +74,11 @@ export default class HomeScreen extends React.Component {
             alert('Login failed! \nPlease check your phone number.');
             this.setState((state, props) => ({
               buttonIsClicked: false,
-              showCode: true,
+              showCode: false,
               enablePh: true,
             }));
           }
-        })
-        .catch(error => {
+        }).catch(error => {
           self.setState({
             buttonIsClicked: false,
           });
@@ -94,28 +88,25 @@ export default class HomeScreen extends React.Component {
   }
 
   _onVerifyPressButton() {
-    if (this.state.userPinCode.length < 6)
-      {Alert.alert('Pincode Error','Please fill all 6 cells with the correct combination');}
-    else
-      {console.log(this.state.userPinCode);}
+    if (this.state.userPinCode.length < 6) { Alert.alert('Pincode Error', 'Please fill all 6 cells with the correct combination'); }
+    else { console.log(this.state.userPinCode); }
     // curl -H "Authorization: Bearer 13731031" "https://mobile-punch.connectedbarrelapi.com/projects/2066188318"
     let self = this;
     self.setState({
       buttonIsClicked: true,
     });
     var cleanedPh = ('' + this.state.ph_text).replace(/\D/g, '');
-    var pincode = '' + this.state.txt2;
-    var url = Config.API_URL + '/projects/' + cleanedPh;
-    var opts = {
+    var pincode = '' + this.state.userPinCode;
+    const requestOptions = {
       method: 'GET',
       headers: {
-        accept: '*/*',
         Authorization: 'Bearer ' + pincode,
       },
     };
     //    console.log("url:"+JSON.stringify(url));
     //    console.log("opts:"+JSON.stringify(opts));
-    fetch(url, opts)
+    var url  = 'https://mobile-punch.connectedbarrelapi.com/projects/' + pincode;
+    fetch(url, requestOptions)
       .then(response => response.json())
       .then(responseJson => {
         responseJson.phone_number = cleanedPh;
@@ -137,7 +128,7 @@ export default class HomeScreen extends React.Component {
           console.log('ERROR RETURN: ' + JSON.stringify(responseJson));
           this.setState((state, props) => ({
             buttonIsClicked: false,
-            showCode: false,
+            //showCode: false,
             enablePh: true,
           }));
         }
@@ -178,10 +169,28 @@ export default class HomeScreen extends React.Component {
     else
       {BackHandler.exitApp();}
   }
+  async requestPermission(){
+    await Alert.alert('Error','Please turn on your location and wifi before using the app, thank you',
+    [{text: 'Ok',onPress: () => BackHandler.exitApp()}]);
+}
 
+  checkLocation(){
+    
+    Geolocation.getCurrentPosition(
+      (position) => {
+       //do stuff with location
+       console.log(position);
+      },
+      (error) => {
+        console.log(error);
+        if (error)
+        {this.requestPermission();}
+      },{enableHighAccuracy: true, timeout: 20000, maximumAge: 1000});
+  }
 
   componentDidMount() {
     this.handler = BackHandler.addEventListener('hardwareBackPress', () => {this.goBack(); return true;});
+    this.checkLocation();
 }
 
 componentWillUnmount() {
@@ -197,6 +206,11 @@ componentWillUnmount() {
           style={styles.logoBackGround}
           source={require('../../src/assets/Background.png')}>
           <Logo width={250} height={40} />
+          <View style={styles.hintContainer}>
+            <Text style={[styles.hint,{opacity:this.state.showCode ? 1 : 0}]}>
+              Enter the verification code we sent to the phone number ending in **{this.state.ph_text.substr(this.state.ph_text.length - 2,this.state.ph_text.length)}
+            </Text>
+          </View>
           <View>
           {!this.state.showCode ? this._renderMainStuff() : (<View style={{marginBottom:12}}>
           {this._renderCodeStuff()}
@@ -223,7 +237,7 @@ componentWillUnmount() {
         <TextInput
           returnKeyType={Platform.OS === 'ios' ? 'done' : 'next'}
           style={styles.phonenr}
-          keyboardType={'phone-pad'}
+          keyboardType={'numeric'}
           placeholder="Enter your phone number"
           onChangeText={this._handleChangeText}
           value={this.state.ph_text}
@@ -341,6 +355,15 @@ const styles = StyleSheet.create({
     marginTop: 30,
     borderRadius: 25,
   },
+  hintContainer:{
+    paddingTop:20,
+    marginHorizontal:Dimensions.get('screen').width * 0.10,
+
+  },
+  hint:{
+    fontSize:16,
+    color:'#A6A6A6',
+  },  
   phonenr: {
     alignItems: 'center',
     textAlign: 'center',

@@ -1,24 +1,21 @@
+/* eslint-disable no-undef */
 /* eslint-disable prettier/prettier */
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable consistent-this */
 /* eslint-disable eqeqeq */
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-trailing-spaces */
-import Alertfunction from './CustomAlert';
-import ResponsiveFontSize from './ResponsiveFontsize';
-import Geolocation from 'react-native-geolocation-service';
-import Config from 'react-native-config';
+import Geolocation from '@react-native-community/geolocation';
 import * as React from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {Text,Image,StyleSheet,Alert,View,Button,TouchableOpacity,Platform,Dimensions,TextInput,ScrollView} from 'react-native';
+import {Text,Image,StyleSheet,Alert,View,Button,TouchableOpacity,Platform,Dimensions,TextInput,ScrollView,PermissionsAndroid  } from 'react-native';
 import 'react-native-get-random-values';
-import {v4 as uuidv4} from 'uuid';
-import {seed} from '../../src/utils/uuidSeed';
 import CollapsibleList from 'react-native-collapsible-list';
 import Icon from 'react-native-vector-icons/AntDesign';
 import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
 import Header from './Header';
 import mapStyle from './mapStyle';
+import {getDistance, getPreciseDistance} from 'geolib';
 
 const Screenwidth = Dimensions.get('window').width;
 const Screenheight = Dimensions.get('window').height;
@@ -37,10 +34,8 @@ export default class DetailScreen extends React.Component {
         error: null,
       },
       /* 
-
       for getting user location on the map
       showsUserLocation
-
      latitude: 37.78825,
       longitude: -122.4324,
       latitudeDelta: 0.0922,
@@ -50,12 +45,6 @@ export default class DetailScreen extends React.Component {
         latitudeDelta: 0.0922,
         longitudeDelta: 0.0421,
       },*/
-      region: {
-        latitude: 37.78825,
-        longitude: -122.4324,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421,
-      },
       Camera: {
         center: {
           latitude: 37.78825,
@@ -73,14 +62,22 @@ export default class DetailScreen extends React.Component {
       currentProject: '',
       searchFilter: '',
       userLocation: {
-        latitude: 39.74955,
-        longitude: -105.00782,
+        latitude: 0,
+        longitude: 0,
+        latitudeDelta: 0.0,
+        longitudeDelta: 0.1,
+      },
+      region: {
+        latitude: 0,
+        longitude: 0,
+        latitudeDelta: 0.04,
+        longitudeDelta: 0.05,
       },
       searchFilterData: [
         {
           title: 'Luxury Tower 22',
           distance: '230m',
-          latitude: 39.749551,
+          latitude: 39.759551,
           longitude: -105.007821,
         },
         {
@@ -149,8 +146,8 @@ export default class DetailScreen extends React.Component {
         {
           title: 'Luxury Tower 22',
           distance: '230m',
-          latitude: 37.78825,
-          longitude: -122.4324,
+          latitude: 40.78055,
+          longitude: -105.02782,
         },
         {
           title: 'Luxury Tower 22',
@@ -266,55 +263,106 @@ export default class DetailScreen extends React.Component {
       this.findCoordinates();
     }); */
   }
+  getOneTimeLocation = () => {
+    Geolocation.getCurrentPosition(
+      //Will give you the current location
+      (position) => {
+        this.setState((pre)=>({
+          userLocation:{
+            longitude:position.coords.longitude,
+            latitude:position.coords.latitude,...pre,
+          },
+          region:{
+            longitude:position.coords.longitude,
+            latitude:position.coords.latitude,
+            latitudeDelta: 0.04,
+            longitudeDelta: 0.05,
+          }}));
 
-  state = {
-    initialPosition: 'unknown',
-    lastPosition: 'unknown',
+        //getting the Longitude from the location json
+        const currentLongitude = 
+          JSON.stringify(position.coords.longitude);
+
+        //getting the Latitude from the location json
+        const currentLatitude = 
+          JSON.stringify(position.coords.latitude);
+
+        //Setting Longitude state
+        
+        //Setting Longitude state
+      },
+      (error) => {
+        console.log(error);
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: 30000,
+        maximumAge: 1000,
+      },
+    );
   };
 
-  /*   componentDidUpdate(prevState){
-    if(this.state.searchFilter != prevState.searchFilter){
-      console.log("test")
-      var response = this.state.projects.filter((data)=>{ return data.title.toLowerCase().includes(this.state.searchFilter.toLowerCase())})
-      this.setState({
-        searchFilterData:response
-        })
+  subscribeLocationLocation = () => {
+    let watchID = Geolocation.watchPosition(
+      (position) => {
+        //Will give you the location on location change
+        
+        console.log(position);
+
+        //getting the Longitude from the location json        
+        const currentLongitude =
+          JSON.stringify(position.coords.longitude);
+
+        //getting the Latitude from the location json
+        const currentLatitude = 
+          JSON.stringify(position.coords.latitude);
+
+        //Setting Longitude state
+
+        //Setting Latitude state
+      },
+      (error) => {
+        console.log(error);
+      },
+      {
+        enableHighAccuracy: false,
+        maximumAge: 1000,
+      },
+    );
+  };
+
+
+  requestLocationPermission = async () => {
+    if (Platform.OS === 'ios') {
+      this.getOneTimeLocation();
+      this.subscribeLocationLocation();
+    } else {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          {
+            title: 'Location Access Required',
+            message: 'This App needs to Access your location',
+          },
+        );
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          //To Check, If Permission is granted
+          this.getOneTimeLocation();
+          this.subscribeLocationLocation();
+        } else {
+          console.log('Permission Denied');
+        }
+      } catch (err) {
+        console.warn(err);
       }
-  }
- */
+    }
+  };
 
   componentDidMount() {
-    /*     var data = this.state.projects.filter((data)=>data.title.toLowerCase().includes(this.state.searchFilter.toLowerCase()))
-    this.setState({
-      searchFilterData:data
-    }) */
-    /*     navigator.geolocation.getCurrentPosition(
-      position =>{ this.setState({personel:{
-        latitude:position.coords.latitude,
-        longitude:position.coords.longitude,
-        error:null,
-      }}
-      ), error => console.log(error)},
-      {enableHighAccuracy:true, timeout:20000, maximumAge:2000}
-      ) */
-    /*     let self = this;
-    Geolocation.getCurrentPosition(
-      position => {
-        const initialPosition = JSON.stringify(position);
-        console.log(initialPosition);
-        this.setState({initialPosition});
-      },
-      error => {
-        if (self.state.doDebug)
-          console.log("test")
-          //Alert.alert('GPS Error', 'Make sure location is enabled.');
-      },
-      {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000},
-    );
-    this.watchID = Geolocation.watchPosition(position => {
-      const lastPosition = JSON.stringify(position);
-      //      this.setState({lastPosition});
-    }); */
+    this.requestLocationPermission();
+    return () => {
+      Geolocation.clearWatch(watchID);
+    };
   }
 
   findCoordinates = () => {
@@ -374,7 +422,6 @@ export default class DetailScreen extends React.Component {
             provider={PROVIDER_GOOGLE}
             region={this.state.region}
             customMapStyle={mapStyle}
-            camera={this.state.camera}
             zoomEnabled={true}
             minZoomLevel={0}>
             <Marker
@@ -382,6 +429,7 @@ export default class DetailScreen extends React.Component {
                 latitude: this.state.userLocation.latitude,
                 longitude: this.state.userLocation.longitude,
               }}
+              image={require('../assets/userimage.png')}
             />
             {this.state.projects.map((item, index) => (
               <Marker
@@ -390,6 +438,7 @@ export default class DetailScreen extends React.Component {
                   latitude: item.latitude,
                   longitude: item.longitude,
                 }}
+                image={require('../assets/projectimage.png')}
                 onPress={() => console.log('123')}
               />
             ))}
@@ -410,7 +459,7 @@ export default class DetailScreen extends React.Component {
               i.title
                 .toLowerCase()
                 .includes(this.state.searchFilter.toLowerCase()),
-            )
+            ).sort((a,b) => getDistance({ latitude: 37.421998333333335, longitude:-122.08400000000002  },{ latitude: a.latitude, longitude: a.longitude }) > getDistance({ latitude: 37.421998333333335, longitude:-122.08400000000002  },{ latitude: b.latitude, longitude: b.longitude }) ? 1 : -1)
             .map((item, index) => (
               <CollapsibleList
                 key={index}
@@ -435,7 +484,16 @@ export default class DetailScreen extends React.Component {
                           Distance
                         </Text>
                         <Text style={{fontSize: 16, color: '#707070'}}>
-                          {item.distance}
+                          {(getDistance(
+                              { latitude: 37.421998333333335, longitude:-122.08400000000002  },
+                              { latitude: item.latitude, longitude: item.longitude }
+                            ) / 1600) < 3 ? (getDistance(
+                              { latitude: 37.421998333333335, longitude:-122.08400000000002  },
+                              { latitude: item.latitude, longitude: item.longitude }
+                            ) / 1600).toFixed(1) : (getDistance(
+                              { latitude: 37.421998333333335, longitude:-122.08400000000002  },
+                              { latitude: item.latitude, longitude: item.longitude }
+                            ) / 1600).toFixed(0)}mi
                         </Text>
                       </View>
                     </View>
@@ -444,7 +502,8 @@ export default class DetailScreen extends React.Component {
                 <View style={styles.buttonContainer}>
                   <TouchableOpacity
                     style={styles.loginIosButton}
-                    underlayColor="#fff">
+                    underlayColor="#fff"
+                    onPress={()=>console.log(item)}>
                     <Text style={styles.loginIosText}>Punch</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
