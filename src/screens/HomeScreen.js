@@ -1,17 +1,17 @@
-/* eslint-disable no-alert */
 /* eslint-disable react-native/no-inline-styles */
+/* eslint-disable no-alert */
 /* eslint-disable consistent-this */
 /* eslint-disable eqeqeq */
 /* eslint-disable no-unused-vars */
 /* eslint-disable prettier/prettier */
 /* eslint-disable no-trailing-spaces */
 import * as React from 'react';
-import {Button,Platform,StyleSheet,ImageBackground,BackHandler,Image,Text,TextInput,View,TouchableOpacity,PermissionsAndroid,Alert,Dimensions} from 'react-native';
-import Config from 'react-native-config';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Keyboard, Platform, StyleSheet, ImageBackground, BackHandler, Image, Text, TextInput, View, Dimensions, TouchableOpacity, Alert } from 'react-native';
 import SmoothPinCodeInput from 'react-native-smooth-pincode-input';
 import Logo from '../assets/Logo.svg';
-import Geolocation from '@react-native-community/geolocation';
+import { registerUser, verifyUserOTP } from '../core/api/Api';
+import { GetKey, SetKey } from '../core/async-storage/AsyncData';
+
 
 export default class HomeScreen extends React.Component {
   constructor(props) {
@@ -20,15 +20,19 @@ export default class HomeScreen extends React.Component {
     this._onLoginPressButton = this._onLoginPressButton.bind(this);
     this._editPhoneNr = this._editPhoneNr.bind(this);
     this._renderIOSVerifyButton = this._renderIOSVerifyButton.bind(this);
+    this.keyboardWillShowSub = null;
+    this.keyboardWillHideSub = null;
     this.state = {
       buttonIsClicked: false,
       ph_text: '',
       txt2: '',
       showCode: false,
       enablePh: true,
-      userPinCode:'',
+      userPinCode: '',
+      showBottomText:true,
     };
-    AsyncStorage.getItem('userdata').then(udata => {
+    
+    GetKey('userdata').then(udata => {
       const jdata = JSON.parse(udata);
       const nav = this.props.navigation;
       if (jdata && jdata.pincode != undefined) {
@@ -37,7 +41,7 @@ export default class HomeScreen extends React.Component {
       }
     });
   }
-    
+
   _onPressButton_FAKE() {
     this.setState((state, props) => ({
       showCode: true,
@@ -54,36 +58,27 @@ export default class HomeScreen extends React.Component {
     let self = this;
     var cleanedPh = ('' + this.state.ph_text).replace(/\D/g, '');
     if (this.state.enablePh) {
-      const requestOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phoneNumber: cleanedPh }),
-      };
-      fetch('https://mobile-punch.connectedbarrelapi.com/register/', requestOptions)
-        .then(response => response.json())
-        .then(responseJson => {
-          //        AsyncStorage.setItem('userdata', JSON.stringify(responseJson) );
-          //        this.props.navigation.navigate('Detail') ;
-          if (responseJson?.MessageId || responseJson) {
-            this.setState((state, props) => ({
-              buttonIsClicked: false,
-              showCode: true,
-              enablePh: true,
-            }));
-          } else {
-            alert('Login failed! \nPlease check your phone number.');
-            this.setState((state, props) => ({
-              buttonIsClicked: false,
-              showCode: false,
-              enablePh: true,
-            }));
-          }
-        }).catch(error => {
-          self.setState({
+      registerUser(cleanedPh).then(responseJson=>{
+        if (responseJson?.MessageId || responseJson) {
+          this.setState((state, props) => ({
             buttonIsClicked: false,
-          });
-          console.error('ERROR:' + error);
+            showCode: true,
+            enablePh: true,
+          }));
+        } else {
+          alert('Login failed! \nPlease check your phone number.');
+          this.setState((state, props) => ({
+            buttonIsClicked: false,
+            showCode: false,
+            enablePh: true,
+          }));
+        }
+      }).catch(error => {
+        self.setState({
+          buttonIsClicked: false,
         });
+        console.error('ERROR:' + error);
+      });
     }
   }
 
@@ -97,53 +92,41 @@ export default class HomeScreen extends React.Component {
     });
     var cleanedPh = ('' + this.state.ph_text).replace(/\D/g, '');
     var pincode = '' + this.state.userPinCode;
-    const requestOptions = {
-      method: 'GET',
-      headers: {
-        Authorization: 'Bearer ' + pincode,
-      },
-    };
     //    console.log("url:"+JSON.stringify(url));
     //    console.log("opts:"+JSON.stringify(opts));
-    var url  = 'https://mobile-punch.connectedbarrelapi.com/projects/' + pincode;
-    fetch(url, requestOptions)
-      .then(response => response.json())
-      .then(responseJson => {
-        responseJson.phone_number = cleanedPh;
-        responseJson.pincode = pincode;
-        var nav = this.props.navigation;
-        if (responseJson.projects != undefined) {
-          AsyncStorage.setItem('userdata', JSON.stringify(responseJson)).then(
-            r => {
-              self.setState({
-                buttonIsClicked: false,
-              });
-              console.log(
-                'Fetch ' + url + ' : ' + JSON.stringify(responseJson),
-              );
-              nav.navigate('Detail');
-            },
-          );
-        } else {
-          console.log('ERROR RETURN: ' + JSON.stringify(responseJson));
-          this.setState((state, props) => ({
-            buttonIsClicked: false,
-            //showCode: false,
-            enablePh: true,
-          }));
-        }
-      })
-      .catch(error => {
-        self.setState({
+    verifyUserOTP(cleanedPh,pincode).then(responseJson=>{
+      responseJson.phone_number = cleanedPh;
+      responseJson.pincode = pincode;
+      var nav = this.props.navigation;
+      if (responseJson.projects != undefined) {
+        SetKey('userdata',JSON.stringify(responseJson)).then(
+          r => {
+            self.setState({
+              buttonIsClicked: false,
+            });
+            nav.navigate('Detail');
+          },
+        );
+      } else {
+        console.log('ERROR RETURN: ' + JSON.stringify(responseJson));
+        this.setState((state, props) => ({
           buttonIsClicked: false,
-        });
-        console.error(error);
+          showCode: false,
+          enablePh: true,
+        }));
+      }
+    })
+    .catch(error => {
+      self.setState({
+        buttonIsClicked: false,
       });
+      console.error(error);
+    });
   }
 
 
   _editPhoneNr(text) {
-    this.setState({text});
+    this.setState({ text });
   }
 
   formatPhoneNumber(phoneNumberString) {
@@ -160,43 +143,34 @@ export default class HomeScreen extends React.Component {
     if (cleaned.length == 10) {
       cleaned = this.formatPhoneNumber(cleaned);
     }
-    this.setState({ph_text: cleaned});
+    this.setState({ ph_text: cleaned });
   };
 
-  goBack = ()=>{
-    if (this.state.showCode == true)
-      {this.setState({showCode:false});}
-    else
-      {BackHandler.exitApp();}
+  goBack = () => {
+    if (this.state.showCode == true) { this.setState({ showCode: false }); }
+    else { BackHandler.exitApp(); }
   }
-  async requestPermission(){
-    await Alert.alert('Error','Please turn on your location and wifi before using the app, thank you',
-    [{text: 'Ok',onPress: () => BackHandler.exitApp()}]);
-}
 
-  checkLocation(){
-    
-    Geolocation.getCurrentPosition(
-      (position) => {
-       //do stuff with location
-       console.log(position);
-      },
-      (error) => {
-        console.log(error);
-        if (error)
-        {this.requestPermission();}
-      },{enableHighAccuracy: true, timeout: 20000, maximumAge: 1000});
-  }
+  keyboardWillHide=()=> {
+   this.setState({showBottomText:true});
+};
+
+  keyboardWillShow = () =>{
+    this.setState({showBottomText:false});
+};
 
   componentDidMount() {
-    this.handler = BackHandler.addEventListener('hardwareBackPress', () => {this.goBack(); return true;});
-    this.checkLocation();
-}
+    this.keyboardWillShowSub = Keyboard.addListener('keyboardDidShow', this.keyboardWillShow);
+    this.keyboardWillHideSub = Keyboard.addListener('keyboardDidHide', this.keyboardWillHide);
+    this.handler = BackHandler.addEventListener('hardwareBackPress', () => { this.goBack(); return true; });
+  }
 
-componentWillUnmount() {
+  componentWillUnmount() {
     this.handler.remove();
-    BackHandler.addEventListener('hardwareBackPress', () => {return false;});
-}
+    this.keyboardWillShowSub.remove();
+    this.keyboardWillHideSub.remove();
+    BackHandler.addEventListener('hardwareBackPress', () => { return false; });
+  }
 
 
   render() {
@@ -207,76 +181,78 @@ componentWillUnmount() {
           source={require('../../src/assets/Background.png')}>
           <Logo width={250} height={40} />
           <View style={styles.hintContainer}>
-            <Text style={[styles.hint,{opacity:this.state.showCode ? 1 : 0}]}>
-              Enter the verification code we sent to the phone number ending in **{this.state.ph_text.substr(this.state.ph_text.length - 2,this.state.ph_text.length)}
+            <Text style={[styles.hint,{opacity:this.state.showCode?1:0}]}>
+              Enter the verification code we sent to the phone number ending in **{this.state.ph_text.substr(this.state.ph_text.length-2,this.state.ph_text.length)}
             </Text>
           </View>
           <View>
-          {!this.state.showCode ? this._renderMainStuff() : (<View style={{marginBottom:12}}>
-          {this._renderCodeStuff()}
-          {this._renderCodeBtn()}
-          <TouchableOpacity onPress={this._resendCode} style={styles.resendContainer}>
-            <Text style={{color:'#334F64',fontSize: 16}}>Resend verification code</Text>  
-          </TouchableOpacity></View>)}
+            {!this.state.showCode ? this._renderMainStuff() : (<View style={{ marginBottom: 12 }}>
+              {this._renderCodeStuff()}
+              {this._renderCodeBtn()}
+              <TouchableOpacity onPress={this._onLoginPressButton} style={styles.resendContainer}>
+                <Text style={{ color: '#334F64', fontSize: 16 }}>Resend verification code</Text>
+              </TouchableOpacity></View>)}
           </View>
-          {!this.state.showCode ?          
-          <Text style={styles.TextBottom}>
-            By signing up, you agree to our Terms of Service and acknowledge that our Privacy Police applies to you.
-           </Text> : <Text style={styles.TextBottom} />}
-        </ImageBackground>    
+          
+        </ImageBackground>
       </View>
     );
   }
-  
- 
 
- _renderMainStuff() {
+
+
+  _renderMainStuff() {
     if (!this.state.showCode) {
       return (
         <>
-        <TextInput
-          returnKeyType={Platform.OS === 'ios' ? 'done' : 'next'}
-          style={styles.phonenr}
-          keyboardType={'numeric'}
-          placeholder="Enter your phone number"
-          onChangeText={this._handleChangeText}
-          value={this.state.ph_text}
-          editable={this.state.enablePh}
-        />
-        <TouchableOpacity
-      style={
-        styles.loginIosButton
-      }
-      onPress={this._onLoginPressButton}
-      underlayColor="#fff">
-      <Text 
-        style={
-        styles.loginIosText}
-        >
+          <TextInput
+            returnKeyType={Platform.OS === 'ios' ? 'done' : 'next'}
+            style={styles.phonenr}
+            keyboardType={'phone-pad'}
+            placeholder="Enter your phone number"
+            onChangeText={this._handleChangeText}
+            value={this.state.ph_text}
+            editable={this.state.enablePh}
+          />
+          <TouchableOpacity
+            style={
+              styles.loginIosButton
+            }
+            onPress={this._onLoginPressButton}
+            underlayColor="#fff">
+            <Text
+              style={
+                styles.loginIosText}
+            >
 
-        SIGN IN
-      </Text>
-    </TouchableOpacity>
-    </>
+              SIGN IN
+            </Text>
+            
+          </TouchableOpacity>
+          {this.state.showBottomText ?
+            <Text style={styles.TextBottom}>
+              By signing up, you agree to our Terms of Service and acknowledge that our Privacy Police applies to you.
+            </Text> : <Text style={styles.TextBottom} />}
+        </>
       );
     } else {
       return null;
     }
   }
 
- _renderCodeStuff() {
+  _renderCodeStuff() {
     if (this.state.showCode) {
       return (
-      <View
-      style={{marginTop:40}}>
-        <SmoothPinCodeInput
-          value={this.state.userPinCode}
-          onTextChange={code => this.setState({ userPinCode:code })}
-          cellStyle={{borderWidth:0,backgroundColor:'#E0DEDD'}}
-          codeLength={6}
+        <View
+          style={{ marginTop: 40 }}>
+          <SmoothPinCodeInput
+            value={this.state.userPinCode}
+            onTextChange={code => this.setState({ userPinCode: code })}
+            cellStyle={{ borderWidth: 0, backgroundColor: '#E0DEDD' }}
+            codeLength={6}
           />
-      </View>
-       
+        </View>
+
       );
     } else {
       return null;
@@ -289,13 +265,13 @@ componentWillUnmount() {
         return this._renderIOSVerifyButton();
       } else {
         return (
-            <TouchableOpacity
+          <TouchableOpacity
             style={styles.loginIosButton}
-              onPress={this._onVerifyPressButton}
-              color="#F05A22"
-            >
+            onPress={this._onVerifyPressButton}
+            color="#F05A22"
+          >
             <Text style={styles.loginIosText}>VERIFY</Text>
-            </TouchableOpacity>
+          </TouchableOpacity>
         );
       }
     } else {
@@ -303,15 +279,11 @@ componentWillUnmount() {
     }
   }
 
-  _resendCode(){
-    console.log('Send code by fetching an api from the backend side');
-  }
-
   _renderIOSVerifyButton() {
     return (
       <TouchableOpacity
-      style={ styles.loginIosButton
-      }
+        style={styles.loginIosButton
+        }
         onPress={this._onVerifyPressButton}
         underlayColor="#fff">
         <Text
@@ -322,9 +294,9 @@ componentWillUnmount() {
         </Text>
       </TouchableOpacity>
     );
-  }                                    
-  
-  
+  }
+
+
 }
 
 const styles = StyleSheet.create({
@@ -335,18 +307,17 @@ const styles = StyleSheet.create({
   },
   logoBackGround: {
     flex: 1,
-    paddingVertical:80,
+    paddingVertical: 80,
     alignItems: 'center',
     width: '100%',
   },
   TextBottom: {
     color: '#334F64',
-    position:'absolute',
-    paddingHorizontal:10,
-    bottom:15,
+    position: 'relative',
     fontSize: 10,
     fontWeight: 'bold',
     marginLeft: 7,
+    marginTop: 150,
   },
   loginIosButton: {
     backgroundColor: '#F05E31',
@@ -355,15 +326,6 @@ const styles = StyleSheet.create({
     marginTop: 30,
     borderRadius: 25,
   },
-  hintContainer:{
-    paddingTop:20,
-    marginHorizontal:Dimensions.get('screen').width * 0.10,
-
-  },
-  hint:{
-    fontSize:16,
-    color:'#A6A6A6',
-  },  
   phonenr: {
     alignItems: 'center',
     textAlign: 'center',
@@ -390,13 +352,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
   },
-  resendContainer:{
-    display:'flex',
-    alignItems:'center',
-    paddingTop:20,
-    
-    
-   
+  resendContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    paddingTop: 20,
   },
- 
+  hintContainer:{
+    paddingTop:20,
+    marginHorizontal:Dimensions.get('screen').width*0.10,
+    fontSize: 10,
+  },
+
 });
