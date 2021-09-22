@@ -175,27 +175,31 @@ export default class HomeScreen extends React.Component {
 
   render() {
     return (
-      <View style={styles.container}>
-        <ImageBackground
-          style={styles.logoBackGround}
-          source={require('../../src/assets/Background.png')}>
-          <Logo width={250} height={40} />
+      <ImageBackground style={{flex:1,paddingHorizontal:20,paddingBottom:20}} source={require('../../src/assets/Background.png')}>
+        <View style={{flex:1}}>
+          <View style={{paddingTop:70,paddingBottom:30}}>
+            <Logo height={40} />
+          </View>
           <View style={styles.hintContainer}>
             <Text style={[styles.hint, { opacity: this.state.showCode ? 1 : 0 }]}>
               Enter the verification code we sent to the phone number ending in **{this.state.ph_text.substr(this.state.ph_text.length - 2, this.state.ph_text.length)}
             </Text>
           </View>
           <View>
-            {!this.state.showCode ? this._renderMainStuff() : (<View style={{ marginBottom: 12 }}>
+            {!this.state.showCode ? this._renderMainStuff() : (
+            <View>
               {this._renderCodeStuff()}
               {this._renderCodeBtn()}
               <TouchableOpacity onPress={this._onLoginPressButton} style={styles.resendContainer}>
                 <Text style={{ color: '#334F64', fontSize: 16 }}>Resend verification code</Text>
               </TouchableOpacity></View>)}
           </View>
-
+        </View>
+        {this.state.showBottomText ?
+            <Text style={styles.TextBottom}>
+              By signing up, you agree to our Terms of Service and acknowledge that our Privacy Police applies to you.
+            </Text> : <Text style={styles.TextBottom} />}
         </ImageBackground>
-      </View>
     );
   }
 
@@ -214,25 +218,9 @@ export default class HomeScreen extends React.Component {
             value={this.state.ph_text}
             editable={this.state.enablePh}
           />
-          <TouchableOpacity
-            style={
-              styles.loginIosButton
-            }
-            onPress={this._onLoginPressButton}
-            underlayColor="#fff">
-            <Text
-              style={
-                styles.loginIosText}
-            >
-
-              SIGN IN
-            </Text>
-
+          <TouchableOpacity style={styles.loginIosButton}onPress={this._onLoginPressButton} underlayColor="#fff">
+            <Text style={styles.loginIosText}>SIGN IN</Text>
           </TouchableOpacity>
-          {this.state.showBottomText ?
-            <Text style={styles.TextBottom}>
-              By signing up, you agree to our Terms of Service and acknowledge that our Privacy Police applies to you.
-            </Text> : <Text style={styles.TextBottom} />}
         </>
       );
     } else {
@@ -244,7 +232,7 @@ export default class HomeScreen extends React.Component {
     if (this.state.showCode) {
       return (
         <View
-          style={{ marginTop: 40 }}>
+          style={{ marginTop: 30 ,alignSelf:'center'}}>
           <SmoothPinCodeInput
             value={this.state.userPinCode}
             onTextChange={code => this.setState({ userPinCode: code })}
@@ -305,24 +293,15 @@ const styles = StyleSheet.create({
     height: '100%',
     width: '100%',
   },
-  logoBackGround: {
-    flex: 1,
-    paddingVertical: 80,
-    alignItems: 'center',
-    width: '100%',
-  },
   TextBottom: {
     color: '#334F64',
     position: 'relative',
     fontSize: 10,
     fontWeight: 'bold',
-    marginLeft: 7,
-    marginTop: 150,
   },
   loginIosButton: {
     backgroundColor: '#F05E31',
     color: '#F05E31',
-    height: 50,
     marginTop: 30,
     borderRadius: 25,
   },
@@ -331,8 +310,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#333333',
     backgroundColor: '#E0DEDD',
-    width: 300,
-    marginTop: 40,
   },
   loginIosText: {
     color: '#FFFFFF',
@@ -358,8 +335,6 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   hintContainer: {
-    paddingTop: 20,
-    marginHorizontal: Dimensions.get('screen').width * 0.10,
     fontSize: 10,
   },
 

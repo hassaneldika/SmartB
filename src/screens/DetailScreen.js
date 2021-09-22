@@ -291,7 +291,6 @@ export default class DetailScreen extends React.Component {
   }
 
   goToPunch(item){
-    GetKey('token').then(res=>console.log(JSON.parse(res)));
     const {initialPosition} = this.state;
     const obj = {...item,userLocation:initialPosition};
     this.props.navigation.navigate('Punch',obj);
@@ -396,12 +395,12 @@ export default class DetailScreen extends React.Component {
                 <View style={styles.buttonContainer}>
                   <TouchableOpacity
                   onPress={()=>this.goToPunch(item)}
-                    style={styles.loginIosButton}
+                    style={[styles.loginIosButton,{marginRight:5}]}
                     underlayColor="#fff">
                     <Text style={styles.loginIosText}>Punch</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={styles.loginIosButton}
+                    style={[styles.loginIosButton,{marginLeft:5}]}
                     underlayColor="#fff">
                     <Text style={styles.loginIosText}>Work Summary</Text>
                   </TouchableOpacity>
@@ -474,11 +473,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     backgroundColor: '#F05E31',
     color: '#F05E31',
-    height: 50,
-    paddingHorizontal: Screenwidth * 0.1,
-    marginHorizontal: Screenwidth * 0.01,
     borderRadius: 20,
-    paddingTop: 10,
+    flex:1,
+    padding:10,
   },
   title: {
     fontSize: 20,
@@ -486,8 +483,7 @@ const styles = StyleSheet.create({
     color: '#334F64',
   },
   buttonContainer: {
-    marginHorizontal: Screenwidth * 0.02,
-    paddingVertical: 15,
+    paddingVertical: 10,
     backgroundColor: '#FFF',
     display: 'flex',
     justifyContent: 'center',

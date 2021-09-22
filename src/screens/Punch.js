@@ -2,8 +2,15 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
 import React, {useState, useEffect} from 'react';
-import {View, StyleSheet, Text, Dimensions, Switch, Image} from 'react-native';
-import {TouchableOpacity} from 'react-native-gesture-handler';
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+  Dimensions,
+  Switch,
+  Image,
+} from 'react-native';
 import Header from './Header';
 import Icon from 'react-native-vector-icons/AntDesign';
 import AwesomeIcon from 'react-native-vector-icons/FontAwesome';
@@ -16,7 +23,7 @@ import {onPunch} from '../core/api/Api';
 const Screenwidth = Dimensions.get('window').width;
 const Screenheight = Dimensions.get('window').height;
 
-const Punch = ({route}) => {
+const Punch = ({route, navigation}) => {
   const [isEnabled, setIsEnabled] = useState(false);
   const [clicked, setClicked] = useState(false);
   const [punched, setPunched] = useState(false);
@@ -185,13 +192,19 @@ const Punch = ({route}) => {
     setClicked(prev => !prev);
   };
 
+  const onGoBack = () => {
+    navigation.goBack();
+  };
+
   useEffect(() => {}, [isTransfer, isEnabled, punched, clicked]);
   return (
-    <View>
+    <View style={{flex: 1}}>
       <Header />
       <View style={styles.infoContainer}>
         <Text style={styles.title}>Punch</Text>
-        <View style={styles.projectTitleContainer}>
+        <TouchableOpacity
+          style={styles.projectTitleContainer}
+          onPress={onGoBack}>
           <Icon
             name="left"
             style={{position: 'relative', right: 40, color: '#334F64'}}
@@ -199,12 +212,12 @@ const Punch = ({route}) => {
             onPress={() => console.log(123)}
           />
           <Text style={styles.projectTitle}>{params.name}</Text>
-        </View>
+        </TouchableOpacity>
         <View>
           <Text style={styles.projectLocation}>{params.address}</Text>
         </View>
       </View>
-      <View style={{height: Screenheight * 0.7, backgroundColor: '#E0DEDD'}}>
+      <View style={{backgroundColor: '#E0DEDD', flexGrow: 1}}>
         <View style={styles.punchContainer}>
           {clicked ? (
             renderAccepted()
@@ -213,7 +226,7 @@ const Punch = ({route}) => {
               <View style={styles.punchOptions}>
                 <Text style={styles.punchOptionsTitle}>Transfer Shift</Text>
                 <Switch
-                  style={{width: 100, transform: [{scale: 1.4}]}}
+                  style={{marginLeft: 20, transform: [{scale: 1.4}]}}
                   trackColor={{false: '#767577', true: '#0096FF'}}
                   thumbColor="#f4f3f4"
                   ios_backgroundColor="#3e3e3e"
@@ -234,7 +247,6 @@ const Punch = ({route}) => {
               </View>
             </>
           )}
-
           <Logo width={100} height={10} style={styles.logoFooter} />
         </View>
       </View>
@@ -244,9 +256,7 @@ const Punch = ({route}) => {
 
 const styles = StyleSheet.create({
   infoContainer: {
-    height: Screenheight * 0.2,
     backgroundColor: '#E0DEDD',
-    paddingBottom: 20,
   },
   title: {
     color: '#A6A6A6',
@@ -269,22 +279,21 @@ const styles = StyleSheet.create({
   projectLocation: {
     textAlign: 'center',
     color: '#707070',
-    paddingHorizontal: 100,
     fontSize: 21,
     display: 'flex',
   },
   punchContainer: {
+    flex: 1,
+    paddingTop: 25,
+    paddingBottom: 10,
+    alignItems: 'center',
+    justifyContent: 'space-between',
     zIndex: 9,
-    height: Screenheight * 0.67,
-    borderTopRightRadius: 40,
-    borderTopLeftRadius: 40,
-    borderBottomRightRadius: 40,
-    borderBottomLeftRadius: 40,
-    marginHorizontal: 10,
-    backgroundColor: '#FFF',
+    borderRadius: 40,
+    margin: 10,
+    backgroundColor: '#fff',
   },
   punchOptions: {
-    paddingTop: 40,
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
@@ -296,32 +305,32 @@ const styles = StyleSheet.create({
   buttonContainer: {
     display: 'flex',
     alignItems: 'center',
-    paddingTop: 100,
   },
   circleButton: {
-    width: 280,
-    height: 280,
-    borderRadius: 280 / 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 180,
+    height: 180,
+    borderRadius: 90,
     backgroundColor: '#F05E31',
   },
   circleButton2: {
-    width: 280,
-    height: 280,
-    borderRadius: 280 / 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 180,
+    height: 180,
+    borderRadius: 90,
     backgroundColor: '#0096FF',
   },
   circleButtonText: {
     fontWeight: 'bold',
     color: '#FFF',
-    fontSize: 50,
-    paddingLeft: 50,
-    paddingTop: 80,
+    fontSize: 40,
   },
   acceptedContainer: {
     display: 'flex',
     alignItems: 'center',
     flex: 1,
-    marginVertical: 30,
   },
   accepetedText: {
     color: '#334F64',
@@ -336,11 +345,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     justifyContent: 'center',
   },
-  logoFooter: {
-    position: 'absolute',
-    bottom: Screenwidth * 0.05,
-    left: Screenwidth * 0.35,
-  },
+  logoFooter: {},
 });
 
 export default Punch;
