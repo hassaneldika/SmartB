@@ -9,17 +9,18 @@ import ResponsiveFontSize from './ResponsiveFontsize';
 import Geolocation from 'react-native-geolocation-service';
 import Config from 'react-native-config';
 import * as React from 'react';
-import {Text,Image,StyleSheet,Alert,View,Button,TouchableOpacity,Platform,Dimensions,TextInput,ScrollView} from 'react-native';
+import { Text, Image, StyleSheet, Alert, View, Button, TouchableOpacity, Platform, Dimensions, TextInput, ScrollView } from 'react-native';
 import 'react-native-get-random-values';
-import {v4 as uuidv4} from 'uuid';
-import {seed} from '../../src/utils/uuidSeed';
+import { v4 as uuidv4 } from 'uuid';
+import { seed } from '../../src/utils/uuidSeed';
 import CollapsibleList from 'react-native-collapsible-list';
 import Icon from 'react-native-vector-icons/AntDesign';
-import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
+import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import Header from './Header';
 import mapStyle from './mapStyle';
 import { GetKey, SetKey } from '../core/async-storage/AsyncData';
 import { getUserProjects } from '../core/api/Api';
+import {getDistance} from 'geolib';
 
 const Screenwidth = Dimensions.get('window').width;
 const Screenheight = Dimensions.get('window').height;
@@ -30,7 +31,7 @@ export default class DetailScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      drop_down_data: [{id: 'abc123', name: 'Please Select Project'}],
+      drop_down_data: [{ id: 'abc123', name: 'Please Select Project' }],
       showButtons: false,
       personal: {
         latitude: 0,
@@ -144,7 +145,7 @@ export default class DetailScreen extends React.Component {
           longitude: -75.5604476,
         },
       ],
-     projects:[],
+      projects: [],
       checkedIn: false,
       currentDeviceId: '',
       location: {
@@ -175,7 +176,7 @@ export default class DetailScreen extends React.Component {
       ],
     };
     //    navigator.geolocation.requestAuthorization();
-    /*     AsyncStorage.getItem('userdata').then(udata => {
+    /*     AsyncStorage.getItem('token').then(udata => {
       const jdata = JSON.parse(udata);
       if (this.state.doDebug) {console.log(udata);}
       this.setState({
@@ -209,12 +210,14 @@ export default class DetailScreen extends React.Component {
  */
 
   componentDidMount() {
-    GetKey('userdata').then(res=>{
-      if (res){
-        const {phone_number,pincode} = JSON.parse(res);
-        getUserProjects(phone_number,pincode).then(responseJson=>{
-             this.setState({projects:responseJson?.projects});
-        }).catch(e=>{});
+    GetKey('token').then(res => {
+      if (res) {
+        const { phone_number, pincode } = JSON.parse(res);
+        getUserProjects(phone_number, pincode).then(responseJson => {
+          if (responseJson?.projects) {
+            this.setState({ projects: responseJson?.projects });
+          }
+        }).catch(e => { });
       }
     });
     /*     var data = this.state.projects.filter((data)=>data.title.toLowerCase().includes(this.state.searchFilter.toLowerCase()))
@@ -230,16 +233,14 @@ export default class DetailScreen extends React.Component {
       ), error => console.log(error)},
       {enableHighAccuracy:true, timeout:20000, maximumAge:2000}
       ) */
-    /*     let self = this;
+    let self = this;
     Geolocation.getCurrentPosition(
       position => {
-        const initialPosition = JSON.stringify(position);
-        console.log(initialPosition);
-        this.setState({initialPosition});
+        this.setState({initialPosition:{...position.coords, latitudeDelta: 0.0922,longitudeDelta: 0.0421}  });
       },
       error => {
         if (self.state.doDebug)
-          console.log("test")
+          {console.log('test');}
           //Alert.alert('GPS Error', 'Make sure location is enabled.');
       },
       {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000},
@@ -247,7 +248,7 @@ export default class DetailScreen extends React.Component {
     this.watchID = Geolocation.watchPosition(position => {
       const lastPosition = JSON.stringify(position);
       //      this.setState({lastPosition});
-    }); */
+    });
   }
 
   findCoordinates = () => {
@@ -273,7 +274,7 @@ export default class DetailScreen extends React.Component {
         }));
       },
       error => Alert.alert(error.message),
-      {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000},
+      { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 },
     );
   };
   /*
@@ -289,26 +290,35 @@ export default class DetailScreen extends React.Component {
     return null;
   }
 
+  goToPunch(item){
+    GetKey('token').then(res=>console.log(JSON.parse(res)));
+    const {initialPosition} = this.state;
+    const obj = {...item,userLocation:initialPosition};
+    this.props.navigation.navigate('Punch',obj);
+  }
+
   render() {
     let self = this;
 
     let optionItems = this.state.drop_down_data.map(proj => {
-      return {value: proj.device_id, label: proj.name};
+      return { value: proj.device_id, label: proj.name };
     });
     let worker = this.state.first_name + ' ' + this.state.last_name;
     let phoneNr = this.formatPhoneNumber(this.state.phone_number);
 
     return (
-      <View style={{flex: 1}}>
+      <View style={{ flex: 1 }}>
         <Header title="Select a project" />
-        <View style={{height: Screenheight / 3}}>
+        <View style={{ height: Screenheight / 3 }}>
           <MapView
-            style={{flex: 1}}
+            style={{ flex: 1 }}
             provider={PROVIDER_GOOGLE}
-            region={this.state.region}
+            initialRegion={this.state.initialPosition}
             customMapStyle={mapStyle}
             camera={this.state.camera}
             zoomEnabled={true}
+            showsUserLocation={true}
+            showsMyLocationButton={true}
             minZoomLevel={0}>
             <Marker
               coordinate={{
@@ -334,16 +344,16 @@ export default class DetailScreen extends React.Component {
             style={styles.searchInput}
             placeholder="Search for a project"
             keyboardType={'number-pad'}
-            onChangeText={e => this.setState({searchFilter: e})}
+            onChangeText={e => this.setState({ searchFilter: e })}
           />
         </View>
         <ScrollView>
-          {this.state.projects
+        {this.state.projects
             .filter(i =>
-              i?.address
+              i.name
                 .toLowerCase()
                 .includes(this.state.searchFilter.toLowerCase()),
-            )
+            ).sort((a,b) => getDistance({ latitude: 37.421998333333335, longitude:-122.08400000000002  },{ latitude: a.latitude, longitude: a.longitude }) > getDistance({ latitude: 37.421998333333335, longitude:-122.08400000000002  },{ latitude: b.latitude, longitude: b.longitude }) ? 1 : -1)
             .map((item, index) => (
               <CollapsibleList
                 key={index}
@@ -364,11 +374,20 @@ export default class DetailScreen extends React.Component {
                           alignItems: 'center',
                           justifyContent: 'center',
                         }}>
-                        <Text style={{fontSize: 10, color: '#707070'}}>
+                        <Text style={{ fontSize: 10, color: '#707070' }}>
                           Distance
                         </Text>
                         <Text style={{fontSize: 16, color: '#707070'}}>
-                          {item.distance}
+                          {(getDistance(
+                              { latitude: 37.421998333333335, longitude:-122.08400000000002  },
+                              { latitude: item.latitude, longitude: item.longitude }
+                            ) / 1600) < 3 ? (getDistance(
+                              { latitude: 37.421998333333335, longitude:-122.08400000000002  },
+                              { latitude: item.latitude, longitude: item.longitude }
+                            ) / 1600).toFixed(1) : (getDistance(
+                              { latitude: 37.421998333333335, longitude:-122.08400000000002  },
+                              { latitude: item.latitude, longitude: item.longitude }
+                            ) / 1600).toFixed(0)}mi
                         </Text>
                       </View>
                     </View>
@@ -376,6 +395,7 @@ export default class DetailScreen extends React.Component {
                 }>
                 <View style={styles.buttonContainer}>
                   <TouchableOpacity
+                  onPress={()=>this.goToPunch(item)}
                     style={styles.loginIosButton}
                     underlayColor="#fff">
                     <Text style={styles.loginIosText}>Punch</Text>

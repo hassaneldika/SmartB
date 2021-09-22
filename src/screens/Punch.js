@@ -9,11 +9,14 @@ import Icon from 'react-native-vector-icons/AntDesign';
 import AwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import Logo from '../assets/Logo.svg';
 import Check from '../assets/check.png';
+import {GetKey} from '../core/async-storage/AsyncData';
+import {v4 as uuidv4} from 'uuid';
+import {onPunch} from '../core/api/Api';
 
 const Screenwidth = Dimensions.get('window').width;
 const Screenheight = Dimensions.get('window').height;
 
-const Punch = () => {
+const Punch = ({route}) => {
   const [isEnabled, setIsEnabled] = useState(false);
   const [clicked, setClicked] = useState(false);
   const [punched, setPunched] = useState(false);
@@ -25,6 +28,8 @@ const Punch = () => {
     month: 0,
     typeHour: 'AM',
   });
+
+  const {params} = route;
 
   const calculateTime = () => {
     var currentdate = new Date();
@@ -66,6 +71,120 @@ const Punch = () => {
     );
   };
 
+  const _doThePost = in_out_transfer => {
+    GetKey('token').then(res => {
+      if (res) {
+        const token = JSON.parse(res);
+        const uuid = uuidv4();
+        const ts = Math.floor(Date.now() / 1000);
+        var punch = {
+          punch: {
+            duration: {
+              initiated: 0,
+              userInput: 0,
+              lookup: 0,
+              pictures: 0,
+              finished: 0,
+            },
+            location: params.userLocation,
+            phoneNumber: token?.phone_number,
+            entryType: 'app',
+            employee: {
+              dbid: token?.dbid,
+              first_name: token?.first_name,
+              last_name: token?.last_name,
+            },
+            punch_time: ts,
+            uuid: uuid,
+          },
+          deviceId: params?.device_id,
+          timestamp: ts,
+        };
+
+        if (in_out_transfer === 'clockIn') {
+          punch.punch.clockIn = true;
+        }
+        if (in_out_transfer === 'clockOut') {
+          punch.punch.clockOut = true;
+        }
+        if (in_out_transfer === 'transfer') {
+          punch.punch.clockOut = true;
+          const flags = {transfer: true};
+          punch.punch.flags = flags;
+        }
+
+        if (self.state.doDebug) {
+          console.log(JSON.stringify(punch));
+        }
+
+        onPunch(token?.pincode, punch)
+          .then(responseJson => {
+            console.log(responseJson);
+            if (self.state.doDebug) {
+              console.log(responseJson);
+            }
+            if (responseJson.success === true) {
+              setClicked(false);
+              console.log('ERROR:' + JSON.stringify(responseJson));
+              var iot_txt = 'You have Transfered';
+              if (in_out_transfer === 'clockIn') {
+                iot_txt = 'You have checked IN';
+              }
+              if (in_out_transfer === 'clockOut') {
+                iot_txt = 'You have checked OUT';
+              }
+              Alert.alert(
+                iot_txt,
+                'at ' + params.name,
+                [
+                  {
+                    text: 'Cancel',
+                    onPress: () => console.log('Cancel Pressed'),
+                    style: 'cancel',
+                  },
+                  {text: 'OK', onPress: () => console.log('OK Pressed')},
+                  ,
+                ],
+                {cancelable: false},
+              );
+
+              //          alert("OK!");
+            } else {
+              setClicked(false);
+              //          console.log("ERROR:"+JSON.stringify(responseJson));
+              Alert.alert(
+                'Punch FAIL!',
+                'Please try to login again.',
+                [
+                  {
+                    text: 'Cancel',
+                    onPress: () => console.log('Cancel Pressed'),
+                    style: 'cancel',
+                  },
+                  {text: 'OK', onPress: () => console.log('OK Pressed')},
+                  ,
+                ],
+                {cancelable: false},
+              );
+            }
+          })
+          .catch(error => {
+            setClicked(false);
+            console.error('ERROR:' + error);
+          });
+      }
+    });
+  };
+
+  const onPunchPress = () => {
+    if (clicked) {
+      _doThePost('clockIn');
+    } else {
+      _doThePost('clockOut');
+    }
+    setClicked(prev => !prev);
+  };
+
   useEffect(() => {}, [isTransfer, isEnabled, punched, clicked]);
   return (
     <View>
@@ -79,12 +198,10 @@ const Punch = () => {
             size={30}
             onPress={() => console.log(123)}
           />
-          <Text style={styles.projectTitle}>Luxury Tower 22</Text>
+          <Text style={styles.projectTitle}>{params.name}</Text>
         </View>
         <View>
-          <Text style={styles.projectLocation}>
-            3194 Biscayne Blvd. Miami Fl,33138
-          </Text>
+          <Text style={styles.projectLocation}>{params.address}</Text>
         </View>
       </View>
       <View style={{height: Screenheight * 0.7, backgroundColor: '#E0DEDD'}}>
@@ -108,7 +225,7 @@ const Punch = () => {
                 <TouchableOpacity
                   style={isEnabled ? styles.circleButton2 : styles.circleButton}
                   onPress={() => {
-                    calculateTime();
+                    onPunchPress();
                   }}>
                   <Text style={styles.circleButtonText}>
                     {isEnabled ? 'Transfer' : 'Punch'}

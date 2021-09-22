@@ -29,10 +29,10 @@ export default class HomeScreen extends React.Component {
       showCode: false,
       enablePh: true,
       userPinCode: '',
-      showBottomText:true,
+      showBottomText: true,
     };
-    
-    GetKey('userdata').then(udata => {
+
+    GetKey('token').then(udata => {
       const jdata = JSON.parse(udata);
       const nav = this.props.navigation;
       if (jdata && jdata.pincode != undefined) {
@@ -58,7 +58,7 @@ export default class HomeScreen extends React.Component {
     let self = this;
     var cleanedPh = ('' + this.state.ph_text).replace(/\D/g, '');
     if (this.state.enablePh) {
-      registerUser(cleanedPh).then(responseJson=>{
+      registerUser(cleanedPh).then(responseJson => {
         if (responseJson?.MessageId || responseJson) {
           this.setState((state, props) => ({
             buttonIsClicked: false,
@@ -94,12 +94,12 @@ export default class HomeScreen extends React.Component {
     var pincode = '' + this.state.userPinCode;
     //    console.log("url:"+JSON.stringify(url));
     //    console.log("opts:"+JSON.stringify(opts));
-    verifyUserOTP(cleanedPh,pincode).then(responseJson=>{
+    verifyUserOTP(cleanedPh, pincode).then(responseJson => {
       responseJson.phone_number = cleanedPh;
       responseJson.pincode = pincode;
       var nav = this.props.navigation;
       if (responseJson.projects != undefined) {
-        SetKey('userdata',JSON.stringify(responseJson)).then(
+        SetKey('token', JSON.stringify(responseJson)).then(
           r => {
             self.setState({
               buttonIsClicked: false,
@@ -116,12 +116,12 @@ export default class HomeScreen extends React.Component {
         }));
       }
     })
-    .catch(error => {
-      self.setState({
-        buttonIsClicked: false,
+      .catch(error => {
+        self.setState({
+          buttonIsClicked: false,
+        });
+        console.error(error);
       });
-      console.error(error);
-    });
   }
 
 
@@ -151,13 +151,13 @@ export default class HomeScreen extends React.Component {
     else { BackHandler.exitApp(); }
   }
 
-  keyboardWillHide=()=> {
-   this.setState({showBottomText:true});
-};
+  keyboardWillHide = () => {
+    this.setState({ showBottomText: true });
+  };
 
-  keyboardWillShow = () =>{
-    this.setState({showBottomText:false});
-};
+  keyboardWillShow = () => {
+    this.setState({ showBottomText: false });
+  };
 
   componentDidMount() {
     this.keyboardWillShowSub = Keyboard.addListener('keyboardDidShow', this.keyboardWillShow);
@@ -181,8 +181,8 @@ export default class HomeScreen extends React.Component {
           source={require('../../src/assets/Background.png')}>
           <Logo width={250} height={40} />
           <View style={styles.hintContainer}>
-            <Text style={[styles.hint,{opacity:this.state.showCode?1:0}]}>
-              Enter the verification code we sent to the phone number ending in **{this.state.ph_text.substr(this.state.ph_text.length-2,this.state.ph_text.length)}
+            <Text style={[styles.hint, { opacity: this.state.showCode ? 1 : 0 }]}>
+              Enter the verification code we sent to the phone number ending in **{this.state.ph_text.substr(this.state.ph_text.length - 2, this.state.ph_text.length)}
             </Text>
           </View>
           <View>
@@ -193,7 +193,7 @@ export default class HomeScreen extends React.Component {
                 <Text style={{ color: '#334F64', fontSize: 16 }}>Resend verification code</Text>
               </TouchableOpacity></View>)}
           </View>
-          
+
         </ImageBackground>
       </View>
     );
@@ -227,7 +227,7 @@ export default class HomeScreen extends React.Component {
 
               SIGN IN
             </Text>
-            
+
           </TouchableOpacity>
           {this.state.showBottomText ?
             <Text style={styles.TextBottom}>
@@ -357,9 +357,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 20,
   },
-  hintContainer:{
-    paddingTop:20,
-    marginHorizontal:Dimensions.get('screen').width*0.10,
+  hintContainer: {
+    paddingTop: 20,
+    marginHorizontal: Dimensions.get('screen').width * 0.10,
     fontSize: 10,
   },
 

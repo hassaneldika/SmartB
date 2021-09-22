@@ -37,3 +37,16 @@ export const getUserProjects = async (phoneNumber, pincode) => {
   );
   return await response.json();
 };
+
+export const onPunch = async (pincode, body) => {
+  const requestOptions = {
+    method: 'POST',
+    headers: {
+      Authorization: 'Bearer ' + pincode,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  };
+  const response = await fetch(BASE_URL + 'punch', requestOptions);
+  return await response.json();
+};
