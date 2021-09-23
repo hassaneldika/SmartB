@@ -4,19 +4,13 @@
 /* eslint-disable eqeqeq */
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-trailing-spaces */
-import Alertfunction from './CustomAlert';
-import ResponsiveFontSize from './ResponsiveFontsize';
-import Geolocation from 'react-native-geolocation-service';
-import Config from 'react-native-config';
+import Geolocation from '@react-native-community/geolocation';
 import * as React from 'react';
 import { Text, Image, StyleSheet, Alert, View, Button, TouchableOpacity, Platform, Dimensions, TextInput, ScrollView } from 'react-native';
 import 'react-native-get-random-values';
-import { v4 as uuidv4 } from 'uuid';
-import { seed } from '../../src/utils/uuidSeed';
 import CollapsibleList from 'react-native-collapsible-list';
 import Icon from 'react-native-vector-icons/AntDesign';
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
-import Header from './Header';
 import mapStyle from './mapStyle';
 import { GetKey, SetKey } from '../core/async-storage/AsyncData';
 import { getUserProjects } from '../core/api/Api';
@@ -306,8 +300,8 @@ export default class DetailScreen extends React.Component {
     let phoneNr = this.formatPhoneNumber(this.state.phone_number);
 
     return (
-      <View style={{ flex: 1 }}>
-        <Header title="Select a project" />
+      <View style={{ flex: 1,backgroundColor:'#E0DEDD' }}>
+        <Text allowFontScaling={false} style={{color:'#707070',fontSize:20,textAlign:'center',marginBottom:10}}>Select a project</Text>
         <View style={{ height: Screenheight / 3 }}>
           <MapView
             style={{ flex: 1 }}
@@ -427,27 +421,21 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: 'white',
   },
-  headerText: {
-    textAlign: 'center',
-    fontSize: 20,
-    width: Screenwidth,
-    paddingVertical: 10,
-  },
   searchInput: {
     backgroundColor: '#DBDBDB',
     borderRadius: 10,
     zIndex: 20,
     flex: 1,
     color: 'black',
-    marginHorizontal: Screenwidth * 0.02,
+    marginHorizontal:10,
     textAlign: 'center',
     textAlignVertical: 'center',
   },
   cardInfo: {
     backgroundColor: '#FFF',
     display: 'flex',
-    padding: Screenwidth * 0.03,
-    marginHorizontal: Screenwidth * 0.02,
+    padding: 10,
+    marginHorizontal:10,
     marginVertical: 5,
     borderRadius: 10,
   },
@@ -459,7 +447,7 @@ const styles = StyleSheet.create({
   icon: {
     position: 'absolute',
     marginTop: 15,
-    left: Screenwidth * 0.05,
+    left: 20,
     zIndex: 99,
   },
   loginIosText: {
@@ -478,6 +466,7 @@ const styles = StyleSheet.create({
     padding:10,
   },
   title: {
+    marginRight:10,
     fontSize: 20,
     fontWeight: '800',
     color: '#334F64',

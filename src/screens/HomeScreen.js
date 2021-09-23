@@ -11,7 +11,7 @@ import SmoothPinCodeInput from 'react-native-smooth-pincode-input';
 import Logo from '../assets/Logo.svg';
 import { registerUser, verifyUserOTP } from '../core/api/Api';
 import { GetKey, SetKey } from '../core/async-storage/AsyncData';
-
+import Geolocation from '@react-native-community/geolocation';
 
 export default class HomeScreen extends React.Component {
   constructor(props) {
@@ -23,6 +23,7 @@ export default class HomeScreen extends React.Component {
     this.keyboardWillShowSub = null;
     this.keyboardWillHideSub = null;
     this.state = {
+      loading:false,
       buttonIsClicked: false,
       ph_text: '',
       txt2: '',
@@ -94,10 +95,12 @@ export default class HomeScreen extends React.Component {
     var pincode = '' + this.state.userPinCode;
     //    console.log("url:"+JSON.stringify(url));
     //    console.log("opts:"+JSON.stringify(opts));
+    this.setState({loading:true});
     verifyUserOTP(cleanedPh, pincode).then(responseJson => {
       responseJson.phone_number = cleanedPh;
       responseJson.pincode = pincode;
       var nav = this.props.navigation;
+      this.setState({loading:false});
       if (responseJson.projects != undefined) {
         SetKey('token', JSON.stringify(responseJson)).then(
           r => {
@@ -117,6 +120,7 @@ export default class HomeScreen extends React.Component {
       }
     })
       .catch(error => {
+      this.setState({loading:false});
         self.setState({
           buttonIsClicked: false,
         });
@@ -151,6 +155,25 @@ export default class HomeScreen extends React.Component {
     else { BackHandler.exitApp(); }
   }
 
+  async requestPermission(){
+    await Alert.alert('Error','Please turn on your location and wifi before using the app, thank you',
+    [{text: 'Ok',onPress: () => BackHandler.exitApp()}]);
+}
+
+  checkLocation(){
+    
+    Geolocation.getCurrentPosition(
+      (position) => {
+       //do stuff with location
+       console.log(position);
+      },
+      (error) => {
+        console.log(error);
+        if (error)
+        {this.requestPermission();}
+      },{enableHighAccuracy: true, timeout: 20000, maximumAge: 1000});
+  }
+
   keyboardWillHide = () => {
     this.setState({ showBottomText: true });
   };
@@ -162,7 +185,8 @@ export default class HomeScreen extends React.Component {
   componentDidMount() {
     this.keyboardWillShowSub = Keyboard.addListener('keyboardDidShow', this.keyboardWillShow);
     this.keyboardWillHideSub = Keyboard.addListener('keyboardDidHide', this.keyboardWillHide);
-    this.handler = BackHandler.addEventListener('hardwareBackPress', () => { this.goBack(); return true; });
+    this.handler = BackHandler.addEventListener('hardwareBackPress', () => {this.goBack(); return true;});
+    this.checkLocation();
   }
 
   componentWillUnmount() {
@@ -176,6 +200,10 @@ export default class HomeScreen extends React.Component {
   render() {
     return (
       <ImageBackground style={{flex:1,paddingHorizontal:20,paddingBottom:20}} source={require('../../src/assets/Background.png')}>
+    {this.state.loading &&
+        <View style={{position:'absolute',zIndex:100,width:'100%', height:'100%',justifyContent:'center',alignItems:'center'}}>
+          <Image source={require('../assets/iconSpinner.gif')}/>
+          </View>}
         <View style={{flex:1}}>
           <View style={{paddingTop:70,paddingBottom:30}}>
             <Logo height={40} />
@@ -296,28 +324,33 @@ const styles = StyleSheet.create({
   TextBottom: {
     color: '#334F64',
     position: 'relative',
-    fontSize: 10,
-    fontWeight: 'bold',
+    fontSize: 12,
   },
   loginIosButton: {
     backgroundColor: '#F05E31',
-    color: '#F05E31',
+    color: '#FFFFFF',
     marginTop: 30,
-    borderRadius: 25,
+    borderRadius: 25, 
+    fontSize:26,
   },
   phonenr: {
     alignItems: 'center',
     textAlign: 'center',
-    color: '#333333',
-    backgroundColor: '#E0DEDD',
+    color: '#A6A6A6',
+    fontSize:16,
+    backgroundColor: '#DBDBDB',
   },
   loginIosText: {
     color: '#FFFFFF',
     margin: 10,
-    fontSize: 16,
+    fontSize: 26,
     textAlign: 'center',
     alignItems: 'center',
     fontWeight: 'bold',
+  },
+  hint:{
+fontSize:16,
+color:'#A6A6A6',
   },
   loginIosDisabledButton: {
     backgroundColor: '#EEEEEE',

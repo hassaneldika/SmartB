@@ -7,11 +7,9 @@ import {
   StyleSheet,
   TouchableOpacity,
   Text,
-  Dimensions,
   Switch,
   Image,
 } from 'react-native';
-import Header from './Header';
 import Icon from 'react-native-vector-icons/AntDesign';
 import AwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import Logo from '../assets/Logo.svg';
@@ -19,9 +17,6 @@ import Check from '../assets/check.png';
 import {GetKey} from '../core/async-storage/AsyncData';
 import {v4 as uuidv4} from 'uuid';
 import {onPunch} from '../core/api/Api';
-
-const Screenwidth = Dimensions.get('window').width;
-const Screenheight = Dimensions.get('window').height;
 
 const Punch = ({route, navigation}) => {
   const [isEnabled, setIsEnabled] = useState(false);
@@ -198,25 +193,25 @@ const Punch = ({route, navigation}) => {
 
   useEffect(() => {}, [isTransfer, isEnabled, punched, clicked]);
   return (
-    <View style={{flex: 1}}>
-      <Header />
-      <View style={styles.infoContainer}>
+    <View style={{flex: 1, backgroundColor: '#E0DEDD'}}>
+      <View>
         <Text allowFontScaling={false} style={styles.title}>
           Punch
         </Text>
         <TouchableOpacity
+          hitSlop={{bottom: 10, top: 10, right: 10, left: 10}}
           style={styles.projectTitleContainer}
           onPress={onGoBack}>
           <Icon
             name="left"
             style={{position: 'relative', right: 40, color: '#334F64'}}
-            size={30}
+            size={24}
             onPress={() => console.log(123)}
           />
-          <Text allowFontScaling={false} style={styles.projectTitle}>
-            {params.name}
-          </Text>
         </TouchableOpacity>
+        <Text allowFontScaling={false} style={styles.projectTitle}>
+          {params.name}
+        </Text>
         <View>
           <Text allowFontScaling={false} style={styles.projectLocation}>
             {params.address}
@@ -265,9 +260,6 @@ const Punch = ({route, navigation}) => {
 };
 
 const styles = StyleSheet.create({
-  infoContainer: {
-    backgroundColor: '#E0DEDD',
-  },
   title: {
     color: '#A6A6A6',
     textAlign: 'center',
