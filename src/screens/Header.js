@@ -13,7 +13,9 @@ const Header = ({title}) => {
         color="#F05E31"
         style={{marginLeft: 10}}
       />
-      <Text style={styles.headerText}>{title}</Text>
+      <Text allowFontScaling={false} style={styles.headerText}>
+        {title}
+      </Text>
     </View>
   );
 };
@@ -23,6 +25,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#E0DEDD',
     display: 'flex',
     flexDirection: 'row',
+    marginTop: 30,
   },
   headerText: {
     textAlign: 'center',

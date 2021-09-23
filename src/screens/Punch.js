@@ -62,10 +62,10 @@ const Punch = ({route, navigation}) => {
   const renderAccepted = () => {
     return (
       <View style={styles.acceptedContainer}>
-        <Text style={styles.accepetedText}>
+        <Text allowFontScaling={false} style={styles.accepetedText}>
           Your {punched ? 'punch' : 'transfer'} has been received at
         </Text>
-        <Text style={styles.acceptedDate}>
+        <Text allowFontScaling={false} style={styles.acceptedDate}>
           {date.day}/{date.month < 10 ? '0' + date.month : date.month}{' '}
           {date.hour < 10 ? '0' + '' + date.hour : date.hour}:
           {date.minute < 10 ? '0' + '' + date.minute : date.minute}{' '}
@@ -201,7 +201,9 @@ const Punch = ({route, navigation}) => {
     <View style={{flex: 1}}>
       <Header />
       <View style={styles.infoContainer}>
-        <Text style={styles.title}>Punch</Text>
+        <Text allowFontScaling={false} style={styles.title}>
+          Punch
+        </Text>
         <TouchableOpacity
           style={styles.projectTitleContainer}
           onPress={onGoBack}>
@@ -211,10 +213,14 @@ const Punch = ({route, navigation}) => {
             size={30}
             onPress={() => console.log(123)}
           />
-          <Text style={styles.projectTitle}>{params.name}</Text>
+          <Text allowFontScaling={false} style={styles.projectTitle}>
+            {params.name}
+          </Text>
         </TouchableOpacity>
         <View>
-          <Text style={styles.projectLocation}>{params.address}</Text>
+          <Text allowFontScaling={false} style={styles.projectLocation}>
+            {params.address}
+          </Text>
         </View>
       </View>
       <View style={{backgroundColor: '#E0DEDD', flexGrow: 1}}>
@@ -224,7 +230,9 @@ const Punch = ({route, navigation}) => {
           ) : (
             <>
               <View style={styles.punchOptions}>
-                <Text style={styles.punchOptionsTitle}>Transfer Shift</Text>
+                <Text allowFontScaling={false} style={styles.punchOptionsTitle}>
+                  Transfer Shift
+                </Text>
                 <Switch
                   style={{marginLeft: 20, transform: [{scale: 1.4}]}}
                   trackColor={{false: '#767577', true: '#0096FF'}}
@@ -240,7 +248,9 @@ const Punch = ({route, navigation}) => {
                   onPress={() => {
                     onPunchPress();
                   }}>
-                  <Text style={styles.circleButtonText}>
+                  <Text
+                    allowFontScaling={false}
+                    style={styles.circleButtonText}>
                     {isEnabled ? 'Transfer' : 'Punch'}
                   </Text>
                 </TouchableOpacity>

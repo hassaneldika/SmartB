@@ -181,7 +181,7 @@ export default class HomeScreen extends React.Component {
             <Logo height={40} />
           </View>
           <View style={styles.hintContainer}>
-            <Text style={[styles.hint, { opacity: this.state.showCode ? 1 : 0 }]}>
+            <Text allowFontScaling={false} style={[styles.hint, { opacity: this.state.showCode ? 1 : 0 }]}>
               Enter the verification code we sent to the phone number ending in **{this.state.ph_text.substr(this.state.ph_text.length - 2, this.state.ph_text.length)}
             </Text>
           </View>
@@ -191,14 +191,14 @@ export default class HomeScreen extends React.Component {
               {this._renderCodeStuff()}
               {this._renderCodeBtn()}
               <TouchableOpacity onPress={this._onLoginPressButton} style={styles.resendContainer}>
-                <Text style={{ color: '#334F64', fontSize: 16 }}>Resend verification code</Text>
+                <Text allowFontScaling={false} style={{ color: '#334F64', fontSize: 16 }}>Resend verification code</Text>
               </TouchableOpacity></View>)}
           </View>
         </View>
         {this.state.showBottomText ?
-            <Text style={styles.TextBottom}>
+            <Text allowFontScaling={false} style={styles.TextBottom}>
               By signing up, you agree to our Terms of Service and acknowledge that our Privacy Police applies to you.
-            </Text> : <Text style={styles.TextBottom} />}
+            </Text> : <Text allowFontScaling={false} style={styles.TextBottom} />}
         </ImageBackground>
     );
   }
@@ -219,7 +219,7 @@ export default class HomeScreen extends React.Component {
             editable={this.state.enablePh}
           />
           <TouchableOpacity style={styles.loginIosButton}onPress={this._onLoginPressButton} underlayColor="#fff">
-            <Text style={styles.loginIosText}>SIGN IN</Text>
+            <Text allowFontScaling={false} style={styles.loginIosText}>SIGN IN</Text>
           </TouchableOpacity>
         </>
       );
@@ -258,7 +258,7 @@ export default class HomeScreen extends React.Component {
             onPress={this._onVerifyPressButton}
             color="#F05A22"
           >
-            <Text style={styles.loginIosText}>VERIFY</Text>
+            <Text allowFontScaling={false} style={styles.loginIosText}>VERIFY</Text>
           </TouchableOpacity>
         );
       }

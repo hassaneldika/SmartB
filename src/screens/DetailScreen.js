@@ -366,17 +366,17 @@ export default class DetailScreen extends React.Component {
                         flexDirection: 'row',
                         justifyContent: 'space-between',
                       }}>
-                      <Text style={styles.title}>{item?.name}</Text>
+                      <Text allowFontScaling={false} style={styles.title}>{item?.name}</Text>
                       <View
                         style={{
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                         }}>
-                        <Text style={{ fontSize: 10, color: '#707070' }}>
+                        <Text allowFontScaling={false} style={{ fontSize: 10, color: '#707070' }}>
                           Distance
                         </Text>
-                        <Text style={{fontSize: 16, color: '#707070'}}>
+                        <Text allowFontScaling={false} style={{fontSize: 16, color: '#707070'}}>
                           {(getDistance(
                               { latitude: 37.421998333333335, longitude:-122.08400000000002  },
                               { latitude: item.latitude, longitude: item.longitude }
@@ -397,12 +397,12 @@ export default class DetailScreen extends React.Component {
                   onPress={()=>this.goToPunch(item)}
                     style={[styles.loginIosButton,{marginRight:5}]}
                     underlayColor="#fff">
-                    <Text style={styles.loginIosText}>Punch</Text>
+                    <Text allowFontScaling={false} style={styles.loginIosText}>Punch</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[styles.loginIosButton,{marginLeft:5}]}
                     underlayColor="#fff">
-                    <Text style={styles.loginIosText}>Work Summary</Text>
+                    <Text allowFontScaling={false} style={styles.loginIosText}>Work Summary</Text>
                   </TouchableOpacity>
                 </View>
               </CollapsibleList>

@@ -66,7 +66,7 @@ class Alertfunction extends Component {
                 onPress={() => this.props.CancelButtonAction()}
               />
             ) : (
-              <Text />
+              <Text allowFontScaling={false} />
             )}
             {this.props.OkButtonAction != null ? (
               <DialogButton
@@ -80,14 +80,14 @@ class Alertfunction extends Component {
                 key="button-2"
               />
             ) : (
-              <Text />
+              <Text allowFontScaling={false} />
             )}
           </DialogFooter>
         }>
         <DialogContent style={styles.ModalContainer}>
           <View>
             <ScrollView>
-              <Text style={this.props.bodyClass}>{this.props.Body} </Text>
+              <Text allowFontScaling={false} style={this.props.bodyClass}>{this.props.Body} </Text>
             </ScrollView>
           </View>
         </DialogContent>
