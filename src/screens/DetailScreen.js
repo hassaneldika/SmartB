@@ -14,7 +14,7 @@ import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import mapStyle from './mapStyle';
 import { GetKey, SetKey } from '../core/async-storage/AsyncData';
 import { getUserProjects } from '../core/api/Api';
-import {getDistance} from 'geolib';
+import { getDistance } from 'geolib';
 
 const Screenwidth = Dimensions.get('window').width;
 const Screenheight = Dimensions.get('window').height;
@@ -230,14 +230,13 @@ export default class DetailScreen extends React.Component {
     let self = this;
     Geolocation.getCurrentPosition(
       position => {
-        this.setState({initialPosition:{...position.coords, latitudeDelta: 0.0922,longitudeDelta: 0.0421}  });
+        this.setState({ initialPosition: { ...position.coords, latitudeDelta: 0.0922, longitudeDelta: 0.0421 } });
       },
       error => {
-        if (self.state.doDebug)
-          {console.log('test');}
-          //Alert.alert('GPS Error', 'Make sure location is enabled.');
+        if (self.state.doDebug) { console.log('test'); }
+        //Alert.alert('GPS Error', 'Make sure location is enabled.');
       },
-      {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000},
+      { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 },
     );
     this.watchID = Geolocation.watchPosition(position => {
       const lastPosition = JSON.stringify(position);
@@ -284,10 +283,10 @@ export default class DetailScreen extends React.Component {
     return null;
   }
 
-  goToPunch(item){
-    const {initialPosition} = this.state;
-    const obj = {...item,userLocation:initialPosition};
-    this.props.navigation.navigate('Punch',obj);
+  goToPunch(item) {
+    const { initialPosition } = this.state;
+    const obj = { ...item, userLocation: initialPosition };
+    this.props.navigation.navigate('Punch', obj);
   }
 
   render() {
@@ -300,8 +299,8 @@ export default class DetailScreen extends React.Component {
     let phoneNr = this.formatPhoneNumber(this.state.phone_number);
 
     return (
-      <View style={{ flex: 1,backgroundColor:'#E0DEDD' }}>
-        <Text allowFontScaling={false} style={{color:'#707070',fontSize:20,textAlign:'center',marginBottom:10}}>Select a project</Text>
+      <View style={{ flex: 1, backgroundColor: '#E0DEDD' }}>
+        <Text allowFontScaling={false} style={{ color: '#707070', fontSize: 20, textAlign: 'center', marginBottom: 10 }}>Select a project</Text>
         <View style={{ height: Screenheight / 3 }}>
           <MapView
             style={{ flex: 1 }}
@@ -341,12 +340,12 @@ export default class DetailScreen extends React.Component {
           />
         </View>
         <ScrollView>
-        {this.state.projects
+          {this.state.projects
             .filter(i =>
               i.name
                 .toLowerCase()
                 .includes(this.state.searchFilter.toLowerCase()),
-            ).sort((a,b) => getDistance({ latitude: 37.421998333333335, longitude:-122.08400000000002  },{ latitude: a.latitude, longitude: a.longitude }) > getDistance({ latitude: 37.421998333333335, longitude:-122.08400000000002  },{ latitude: b.latitude, longitude: b.longitude }) ? 1 : -1)
+            ).sort((a, b) => getDistance({ latitude: 37.421998333333335, longitude: -122.08400000000002 }, { latitude: a.latitude, longitude: a.longitude }) > getDistance({ latitude: 37.421998333333335, longitude: -122.08400000000002 }, { latitude: b.latitude, longitude: b.longitude }) ? 1 : -1)
             .map((item, index) => (
               <CollapsibleList
                 key={index}
@@ -354,43 +353,43 @@ export default class DetailScreen extends React.Component {
                 buttonPosition="top"
                 numberOfVisibleItems={0}
                 buttonContent={
-                    <View style={{flexDirection: 'row'}}>
-                      <View style={{flex:1}}>
+                  <View style={{ flexDirection: 'row' }}>
+                    <View style={{ flex: 1 }}>
                       <Text allowFontScaling={false} style={styles.title}>{item?.name}</Text>
-                      </View>
-                      <View
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}>
-                        <Text allowFontScaling={false} style={{ fontSize: 10, color: '#707070' }}>
-                          Distance
-                        </Text>
-                        <Text allowFontScaling={false} style={{fontSize: 16, color: '#707070'}}>
-                          {(getDistance(
-                              { latitude: 37.421998333333335, longitude:-122.08400000000002  },
-                              { latitude: item.latitude, longitude: item.longitude }
-                            ) / 1600) < 3 ? (getDistance(
-                              { latitude: 37.421998333333335, longitude:-122.08400000000002  },
-                              { latitude: item.latitude, longitude: item.longitude }
-                            ) / 1600).toFixed(1) : (getDistance(
-                              { latitude: 37.421998333333335, longitude:-122.08400000000002  },
-                              { latitude: item.latitude, longitude: item.longitude }
-                            ) / 1600).toFixed(0)}mi
-                        </Text>
-                      </View>
                     </View>
+                    <View
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}>
+                      <Text allowFontScaling={false} style={{ fontSize: 10, color: '#707070' }}>
+                        Distance
+                      </Text>
+                      <Text allowFontScaling={false} style={{ fontSize: 16, color: '#707070' }}>
+                        {(getDistance(
+                          { latitude: 37.421998333333335, longitude: -122.08400000000002 },
+                          { latitude: item.latitude, longitude: item.longitude }
+                        ) / 1600) < 3 ? (getDistance(
+                          { latitude: 37.421998333333335, longitude: -122.08400000000002 },
+                          { latitude: item.latitude, longitude: item.longitude }
+                        ) / 1600).toFixed(1) : (getDistance(
+                          { latitude: 37.421998333333335, longitude: -122.08400000000002 },
+                          { latitude: item.latitude, longitude: item.longitude }
+                        ) / 1600).toFixed(0)}mi
+                      </Text>
+                    </View>
+                  </View>
                 }>
                 <View style={styles.buttonContainer}>
                   <TouchableOpacity
-                  onPress={()=>this.goToPunch(item)}
-                    style={[styles.loginIosButton,{marginRight:5}]}
+                    onPress={() => this.goToPunch(item)}
+                    style={[styles.loginIosButton, { marginRight: 5 }]}
                     underlayColor="#fff">
                     <Text allowFontScaling={false} style={styles.loginIosText}>Punch</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={[styles.loginIosButton,{marginLeft:5}]}
+                    style={[styles.loginIosButton, { marginLeft: 5 }]}
                     underlayColor="#fff">
                     <Text allowFontScaling={false} style={styles.loginIosText}>Work Summary</Text>
                   </TouchableOpacity>
@@ -423,14 +422,14 @@ const styles = StyleSheet.create({
     zIndex: 20,
     flex: 1,
     color: 'black',
-    marginHorizontal:10,
+    marginHorizontal: 10,
     textAlign: 'center',
     textAlignVertical: 'center',
   },
   cardInfo: {
     backgroundColor: '#FFF',
     padding: 10,
-    marginHorizontal:10,
+    marginHorizontal: 10,
     marginVertical: 5,
     borderRadius: 10,
   },
@@ -457,11 +456,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#F05E31',
     color: '#F05E31',
     borderRadius: 20,
-    flex:1,
-    padding:10,
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 10,
   },
   title: {
-    marginRight:10,
+    marginRight: 10,
     fontSize: 20,
     fontWeight: '800',
     color: '#334F64',
