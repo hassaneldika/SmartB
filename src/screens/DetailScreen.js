@@ -354,13 +354,10 @@ export default class DetailScreen extends React.Component {
                 buttonPosition="top"
                 numberOfVisibleItems={0}
                 buttonContent={
-                  <View>
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                      }}>
+                    <View style={{flexDirection: 'row'}}>
+                      <View style={{flex:1}}>
                       <Text allowFontScaling={false} style={styles.title}>{item?.name}</Text>
+                      </View>
                       <View
                         style={{
                           display: 'flex',
@@ -384,7 +381,6 @@ export default class DetailScreen extends React.Component {
                         </Text>
                       </View>
                     </View>
-                  </View>
                 }>
                 <View style={styles.buttonContainer}>
                   <TouchableOpacity
@@ -433,7 +429,6 @@ const styles = StyleSheet.create({
   },
   cardInfo: {
     backgroundColor: '#FFF',
-    display: 'flex',
     padding: 10,
     marginHorizontal:10,
     marginVertical: 5,

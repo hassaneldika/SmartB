@@ -198,20 +198,27 @@ const Punch = ({route, navigation}) => {
         <Text allowFontScaling={false} style={styles.title}>
           Punch
         </Text>
-        <TouchableOpacity
-          hitSlop={{bottom: 10, top: 10, right: 10, left: 10}}
-          style={styles.projectTitleContainer}
-          onPress={onGoBack}>
-          <Icon
-            name="left"
-            style={{position: 'relative', right: 40, color: '#334F64'}}
-            size={24}
-            onPress={() => console.log(123)}
-          />
-        </TouchableOpacity>
-        <Text allowFontScaling={false} style={styles.projectTitle}>
-          {params.name}
-        </Text>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignSelf: 'center',
+            alignItems: 'center',
+          }}>
+          <TouchableOpacity
+            hitSlop={{bottom: 10, top: 10, right: 10, left: 10}}
+            style={styles.projectTitleContainer}
+            onPress={onGoBack}>
+            <Icon
+              name="left"
+              style={{marginRight: 20, color: '#334F64'}}
+              size={24}
+              onPress={() => console.log(123)}
+            />
+          </TouchableOpacity>
+          <Text allowFontScaling={false} style={styles.projectTitle}>
+            {params.name}
+          </Text>
+        </View>
         <View>
           <Text allowFontScaling={false} style={styles.projectLocation}>
             {params.address}

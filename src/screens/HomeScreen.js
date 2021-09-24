@@ -199,10 +199,10 @@ export default class HomeScreen extends React.Component {
 
   render() {
     return (
-      <ImageBackground style={{flex:1,paddingHorizontal:20,paddingBottom:20}} source={require('../../src/assets/Background.png')}>
+      <ImageBackground style={{flex:1,paddingHorizontal:20,paddingBottom:20}} source={require('../assets/Background.png')}>
     {this.state.loading &&
         <View style={{position:'absolute',zIndex:100,width:'100%', height:'100%',justifyContent:'center',alignItems:'center'}}>
-          <Image source={require('../assets/iconSpinner.gif')}/>
+          <Image style={{height:150,width:200,resizeMode:'contain'}} source={require('../assets/iconSpinner.gif')}/>
           </View>}
         <View style={{flex:1}}>
           <View style={{paddingTop:70,paddingBottom:30}}>

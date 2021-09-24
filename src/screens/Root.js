@@ -18,12 +18,12 @@ const HomeNavigator = props => {
       <Stack.Screen name="Detail" navigation={props.navigation} component={DetailScreen} options={{
         headerLeft: () => <HeaderLeft/>,
         headerTitle:'',
-        headerStyle:{backgroundColor:'#E0DEDD'},
+        headerStyle: { backgroundColor: '#E0DEDD', elevation: 0, shadowOpacity: 0 },
         }} />
       <Stack.Screen name="Punch" navigation={props.navigation} component={PunchScreen}   options={{
         headerLeft: () => <HeaderLeft/>,
         headerTitle:'',
-        headerStyle:{backgroundColor:'#E0DEDD'},
+        headerStyle: { backgroundColor: '#E0DEDD', elevation: 0, shadowOpacity: 0 },
         }} />
     </Stack.Navigator>
   </NavigationContainer>
