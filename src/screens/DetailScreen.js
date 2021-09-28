@@ -419,12 +419,11 @@ const styles = StyleSheet.create({
   searchInput: {
     backgroundColor: '#DBDBDB',
     borderRadius: 10,
-    zIndex: 20,
     flex: 1,
     color: 'black',
-    marginHorizontal: 10,
-    textAlign: 'center',
-    textAlignVertical: 'center',
+    paddingLeft: 50,
+    paddingRight: 10,
+    textAlign: 'left',
   },
   cardInfo: {
     backgroundColor: '#FFF',

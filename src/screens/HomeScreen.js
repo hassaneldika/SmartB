@@ -23,7 +23,7 @@ export default class HomeScreen extends React.Component {
     this.keyboardWillShowSub = null;
     this.keyboardWillHideSub = null;
     this.state = {
-      loading:false,
+      loading: false,
       buttonIsClicked: false,
       ph_text: '',
       txt2: '',
@@ -38,6 +38,7 @@ export default class HomeScreen extends React.Component {
       const nav = this.props.navigation;
       if (jdata && jdata.pincode != undefined) {
         console.log('Already logged in ...');
+        return
         nav.navigate('Detail');
       }
     });
@@ -95,12 +96,12 @@ export default class HomeScreen extends React.Component {
     var pincode = '' + this.state.userPinCode;
     //    console.log("url:"+JSON.stringify(url));
     //    console.log("opts:"+JSON.stringify(opts));
-    this.setState({loading:true});
+    this.setState({ loading: true });
     verifyUserOTP(cleanedPh, pincode).then(responseJson => {
       responseJson.phone_number = cleanedPh;
       responseJson.pincode = pincode;
       var nav = this.props.navigation;
-      this.setState({loading:false});
+      this.setState({ loading: false });
       if (responseJson.projects != undefined) {
         SetKey('token', JSON.stringify(responseJson)).then(
           r => {
@@ -120,7 +121,7 @@ export default class HomeScreen extends React.Component {
       }
     })
       .catch(error => {
-      this.setState({loading:false});
+        this.setState({ loading: false });
         self.setState({
           buttonIsClicked: false,
         });
@@ -155,23 +156,22 @@ export default class HomeScreen extends React.Component {
     else { BackHandler.exitApp(); }
   }
 
-  async requestPermission(){
-    await Alert.alert('Error','Please turn on your location and wifi before using the app, thank you',
-    [{text: 'Ok',onPress: () => BackHandler.exitApp()}]);
-}
+  async requestPermission() {
+    await Alert.alert('Error', 'Please turn on your location and wifi before using the app, thank you',
+      [{ text: 'Ok', onPress: () => BackHandler.exitApp() }]);
+  }
 
-  checkLocation(){
-    
+  checkLocation() {
+
     Geolocation.getCurrentPosition(
       (position) => {
-       //do stuff with location
-       console.log(position);
+        //do stuff with location
+        console.log(position);
       },
       (error) => {
         console.log(error);
-        if (error)
-        {this.requestPermission();}
-      },{enableHighAccuracy: true, timeout: 20000, maximumAge: 1000});
+        if (error) { this.requestPermission(); }
+      }, { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 });
   }
 
   keyboardWillHide = () => {
@@ -185,7 +185,7 @@ export default class HomeScreen extends React.Component {
   componentDidMount() {
     this.keyboardWillShowSub = Keyboard.addListener('keyboardDidShow', this.keyboardWillShow);
     this.keyboardWillHideSub = Keyboard.addListener('keyboardDidHide', this.keyboardWillHide);
-    this.handler = BackHandler.addEventListener('hardwareBackPress', () => {this.goBack(); return true;});
+    this.handler = BackHandler.addEventListener('hardwareBackPress', () => { this.goBack(); return true; });
     this.checkLocation();
   }
 
@@ -199,13 +199,13 @@ export default class HomeScreen extends React.Component {
 
   render() {
     return (
-      <ImageBackground style={{flex:1,paddingHorizontal:20,paddingBottom:20}} source={require('../assets/Background.png')}>
-    {this.state.loading &&
-        <View style={{position:'absolute',zIndex:100,width:'100%', height:'100%',justifyContent:'center',alignItems:'center'}}>
-          <Image style={{height:150,width:200,resizeMode:'contain'}} source={require('../assets/iconSpinner.gif')}/>
+      <ImageBackground style={{ flex: 1, paddingHorizontal: 20, paddingBottom: 20 }} source={require('../assets/Background.png')}>
+        {!this.state.loading &&
+          <View style={{ position: 'absolute', zIndex: 100, width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' }}>
+            <Image style={{ opacity: 0.6, height: 128, width: 128, resizeMode: 'contain' }} source={require('../assets/iconSpinner.gif')} />
           </View>}
-        <View style={{flex:1}}>
-          <View style={{paddingTop:70,paddingBottom:30}}>
+        <View style={{ flex: 1 }}>
+          <View style={{ paddingTop: 70, paddingBottom: 30 }}>
             <Logo height={40} />
           </View>
           <View style={styles.hintContainer}>
@@ -215,19 +215,19 @@ export default class HomeScreen extends React.Component {
           </View>
           <View>
             {!this.state.showCode ? this._renderMainStuff() : (
-            <View>
-              {this._renderCodeStuff()}
-              {this._renderCodeBtn()}
-              <TouchableOpacity onPress={this._onLoginPressButton} style={styles.resendContainer}>
-                <Text allowFontScaling={false} style={{ color: '#334F64', fontSize: 16 }}>Resend verification code</Text>
-              </TouchableOpacity></View>)}
+              <View>
+                {this._renderCodeStuff()}
+                {this._renderCodeBtn()}
+                <TouchableOpacity onPress={this._onLoginPressButton} style={styles.resendContainer}>
+                  <Text allowFontScaling={false} style={{ color: '#334F64', fontSize: 16 }}>Resend verification code</Text>
+                </TouchableOpacity></View>)}
           </View>
         </View>
         {this.state.showBottomText ?
-            <Text allowFontScaling={false} style={styles.TextBottom}>
-              By signing up, you agree to our Terms of Service and acknowledge that our Privacy Police applies to you.
-            </Text> : <Text allowFontScaling={false} style={styles.TextBottom} />}
-        </ImageBackground>
+          <Text allowFontScaling={false} style={styles.TextBottom}>
+            By signing up, you agree to our Terms of Service and acknowledge that our Privacy Police applies to you.
+          </Text> : <Text allowFontScaling={false} style={styles.TextBottom} />}
+      </ImageBackground>
     );
   }
 
@@ -246,7 +246,7 @@ export default class HomeScreen extends React.Component {
             value={this.state.ph_text}
             editable={this.state.enablePh}
           />
-          <TouchableOpacity style={styles.loginIosButton}onPress={this._onLoginPressButton} underlayColor="#fff">
+          <TouchableOpacity style={styles.loginIosButton} onPress={this._onLoginPressButton} underlayColor="#fff">
             <Text allowFontScaling={false} style={styles.loginIosText}>SIGN IN</Text>
           </TouchableOpacity>
         </>
@@ -260,7 +260,7 @@ export default class HomeScreen extends React.Component {
     if (this.state.showCode) {
       return (
         <View
-          style={{ marginTop: 30 ,alignSelf:'center'}}>
+          style={{ marginTop: 30, alignSelf: 'center' }}>
           <SmoothPinCodeInput
             value={this.state.userPinCode}
             onTextChange={code => this.setState({ userPinCode: code })}
@@ -330,14 +330,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#F05E31',
     color: '#FFFFFF',
     marginTop: 30,
-    borderRadius: 25, 
-    fontSize:26,
+    borderRadius: 25,
+    fontSize: 26,
   },
   phonenr: {
-    alignItems: 'center',
-    textAlign: 'center',
+    textAlign: 'left',
     color: '#A6A6A6',
-    fontSize:16,
+    fontSize: 16,
+    paddingHorizontal: 10,
     backgroundColor: '#DBDBDB',
   },
   loginIosText: {
@@ -348,9 +348,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     fontWeight: 'bold',
   },
-  hint:{
-fontSize:16,
-color:'#A6A6A6',
+  hint: {
+    fontSize: 16,
+    color: '#A6A6A6',
   },
   loginIosDisabledButton: {
     backgroundColor: '#EEEEEE',

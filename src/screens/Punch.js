@@ -1,7 +1,7 @@
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -14,11 +14,11 @@ import Icon from 'react-native-vector-icons/AntDesign';
 import AwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import Logo from '../assets/Logo.svg';
 import Check from '../assets/check.png';
-import {GetKey} from '../core/async-storage/AsyncData';
-import {v4 as uuidv4} from 'uuid';
-import {onPunch} from '../core/api/Api';
+import { GetKey } from '../core/async-storage/AsyncData';
+import { v4 as uuidv4 } from 'uuid';
+import { onPunch } from '../core/api/Api';
 
-const Punch = ({route, navigation}) => {
+const Punch = ({ route, navigation }) => {
   const [isEnabled, setIsEnabled] = useState(false);
   const [clicked, setClicked] = useState(false);
   const [punched, setPunched] = useState(false);
@@ -31,7 +31,7 @@ const Punch = ({route, navigation}) => {
     typeHour: 'AM',
   });
 
-  const {params} = route;
+  const { params } = route;
 
   const calculateTime = () => {
     var currentdate = new Date();
@@ -111,7 +111,7 @@ const Punch = ({route, navigation}) => {
         }
         if (in_out_transfer === 'transfer') {
           punch.punch.clockOut = true;
-          const flags = {transfer: true};
+          const flags = { transfer: true };
           punch.punch.flags = flags;
         }
 
@@ -144,12 +144,12 @@ const Punch = ({route, navigation}) => {
                     onPress: () => console.log('Cancel Pressed'),
                     style: 'cancel',
                   },
-                  {text: 'OK', onPress: () => console.log('OK Pressed')},
+                  { text: 'OK', onPress: () => console.log('OK Pressed') },
                   ,
                 ],
-                {cancelable: false},
+                { cancelable: false },
               );
-
+              onGoBack()
               //          alert("OK!");
             } else {
               setClicked(false);
@@ -163,10 +163,10 @@ const Punch = ({route, navigation}) => {
                     onPress: () => console.log('Cancel Pressed'),
                     style: 'cancel',
                   },
-                  {text: 'OK', onPress: () => console.log('OK Pressed')},
+                  { text: 'OK', onPress: () => console.log('OK Pressed') },
                   ,
                 ],
-                {cancelable: false},
+                { cancelable: false },
               );
             }
           })
@@ -191,9 +191,9 @@ const Punch = ({route, navigation}) => {
     navigation.goBack();
   };
 
-  useEffect(() => {}, [isTransfer, isEnabled, punched, clicked]);
+  useEffect(() => { }, [isTransfer, isEnabled, punched, clicked]);
   return (
-    <View style={{flex: 1, backgroundColor: '#E0DEDD'}}>
+    <View style={{ flex: 1, backgroundColor: '#E0DEDD' }}>
       <View>
         <Text allowFontScaling={false} style={styles.title}>
           Punch
@@ -205,12 +205,12 @@ const Punch = ({route, navigation}) => {
             alignItems: 'center',
           }}>
           <TouchableOpacity
-            hitSlop={{bottom: 10, top: 10, right: 10, left: 10}}
+            hitSlop={{ bottom: 10, top: 10, right: 10, left: 10 }}
             style={styles.projectTitleContainer}
             onPress={onGoBack}>
             <Icon
               name="left"
-              style={{marginRight: 20, color: '#334F64'}}
+              style={{ marginRight: 20, color: '#334F64' }}
               size={24}
               onPress={() => console.log(123)}
             />
@@ -225,7 +225,7 @@ const Punch = ({route, navigation}) => {
           </Text>
         </View>
       </View>
-      <View style={{backgroundColor: '#E0DEDD', flexGrow: 1}}>
+      <View style={{ backgroundColor: '#E0DEDD', flexGrow: 1 }}>
         <View style={styles.punchContainer}>
           {clicked ? (
             renderAccepted()
@@ -236,8 +236,8 @@ const Punch = ({route, navigation}) => {
                   Transfer Shift
                 </Text>
                 <Switch
-                  style={{marginLeft: 20, transform: [{scale: 1.4}]}}
-                  trackColor={{false: '#767577', true: '#0096FF'}}
+                  style={{ marginLeft: 20, transform: [{ scale: 1.4 }] }}
+                  trackColor={{ false: '#767577', true: '#0096FF' }}
                   thumbColor="#f4f3f4"
                   ios_backgroundColor="#3e3e3e"
                   onValueChange={e => setIsEnabled(!isEnabled)}
