@@ -309,12 +309,20 @@ export default class DetailScreen extends React.Component {
             customMapStyle={mapStyle}
             camera={this.state.camera}
             zoomEnabled={true}
-            showsUserLocation={true}
+            // showsUserLocation={true}
             showsMyLocationButton={true}
             minZoomLevel={0}>
+            <Marker
+              image={require('../assets/userimage.png')}
+              coordinate={{
+                latitude: this.state.initialPosition?.latitude || 0,
+                longitude: this.state.initialPosition?.longitude || 0,
+              }}
+            />
             {this.state.projects.map((item, index) => (
               <Marker
                 key={index}
+                image={require('../assets/projectimage.png')}
                 coordinate={{
                   latitude: item.latitude,
                   longitude: item.longitude,
