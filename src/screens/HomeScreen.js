@@ -38,7 +38,6 @@ export default class HomeScreen extends React.Component {
       const nav = this.props.navigation;
       if (jdata && jdata.pincode != undefined) {
         console.log('Already logged in ...');
-        return
         nav.navigate('Detail');
       }
     });

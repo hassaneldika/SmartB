@@ -312,12 +312,6 @@ export default class DetailScreen extends React.Component {
             showsUserLocation={true}
             showsMyLocationButton={true}
             minZoomLevel={0}>
-            <Marker
-              coordinate={{
-                latitude: this.state.userLocation.latitude,
-                longitude: this.state.userLocation.longitude,
-              }}
-            />
             {this.state.projects.map((item, index) => (
               <Marker
                 key={index}
