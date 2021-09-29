@@ -9,6 +9,7 @@ import {
   Text,
   Switch,
   Image,
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/AntDesign';
 import AwesomeIcon from 'react-native-vector-icons/FontAwesome';
@@ -77,6 +78,7 @@ const Punch = ({ route, navigation }) => {
     GetKey('token').then(res => {
       if (res) {
         const token = JSON.parse(res);
+        console.log(token)
         const uuid = uuidv4();
         const ts = Math.floor(Date.now() / 1000);
         var punch = {
@@ -90,11 +92,12 @@ const Punch = ({ route, navigation }) => {
             },
             location: params.userLocation,
             phoneNumber: token?.phone_number,
+            currentProject: params?.name,
             entryType: 'app',
             employee: {
-              dbid: token?.dbid,
-              first_name: token?.first_name,
-              last_name: token?.last_name,
+              dbid: token?.user?.dbid,
+              first_name: token?.user?.first_name,
+              last_name: token?.user?.last_name,
             },
             punch_time: ts,
             uuid: uuid,
@@ -115,19 +118,12 @@ const Punch = ({ route, navigation }) => {
           punch.punch.flags = flags;
         }
 
-        if (self.state.doDebug) {
-          console.log(JSON.stringify(punch));
-        }
-
         onPunch(token?.pincode, punch)
           .then(responseJson => {
             console.log(responseJson);
-            if (self.state.doDebug) {
-              console.log(responseJson);
-            }
             if (responseJson.success === true) {
               setClicked(false);
-              console.log('ERROR:' + JSON.stringify(responseJson));
+              console.log('Success:' + JSON.stringify(responseJson));
               var iot_txt = 'You have Transfered';
               if (in_out_transfer === 'clockIn') {
                 iot_txt = 'You have checked IN';
