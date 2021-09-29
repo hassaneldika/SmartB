@@ -309,7 +309,7 @@ export default class DetailScreen extends React.Component {
             customMapStyle={mapStyle}
             camera={this.state.camera}
             zoomEnabled={true}
-            // showsUserLocation={true}
+            showsUserLocation={false}
             showsMyLocationButton={true}
             minZoomLevel={0}>
             <Marker
